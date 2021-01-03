@@ -1,0 +1,4 @@
+lib:lnk/libisl.so
+lib:lnk/libisl.so.23
+lib:lib/libisl.so.23.0.0
+rsc:lib/libisl.so.23.0.0-gdb.py

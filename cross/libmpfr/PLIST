@@ -1,0 +1,3 @@
+lib:lnk/libmpfr.so
+lib:lnk/libmpfr.so.6
+lib:lib/libmpfr.so.6.1.0

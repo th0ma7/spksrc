@@ -1,0 +1,32 @@
+PKG_NAME = gcc
+PKG_VERS = 5.5.0
+PKG_EXT = tar.xz
+PKG_DIST_NAME = $(PKG_NAME)-$(PKG_VERS).$(PKG_EXT)
+PKG_DIST_SITE = http://ftp.gnu.org/gnu/$(PKG_NAME)/$(PKG_NAME)-$(PKG_VERS)
+PKG_DIST_FILE = $(PKG_NAME)-$(PKG_VERS).$(PKG_EXT)
+PKG_DIR = $(PKG_NAME)-$(PKG_VERS)
+
+DEPENDS = cross/zlib cross/zstd cross/gmp cross/libmpfr cross/libmpc cross/libisl
+
+HOMEPAGE = https://gcc.gnu.org/
+COMMENT = The GNU Compiler Collection includes front ends for C, C++, Objective-C, Fortran, Ada, Go, and D, as well as libraries for these languages (libstdc++,...). GCC was originally written as the compiler for the GNU operating system.
+LICENSE = GPL v3.0
+
+GNU_CONFIGURE = 1
+CONFIGURE_ARGS  = --with-system-zlib
+CONFIGURE_ARGS += --disable-multilib
+
+# A VALIER
+# --disable-multilib
+
+
+#PRE_CONFIGURE_TARGET = rnm_pre_configure
+
+include ../../mk/spksrc.cross-cc.mk
+
+# requires gnu GCC >= 4.8
+#UNSUPPORTED_ARCHS = $(ARMv5_ARCHS) $(OLD_PPC_ARCHS)
+#
+#.PHONY: rnm_pre_configure
+#rnm_pre_configure:
+#	$(RUN) ./autogen.sh
