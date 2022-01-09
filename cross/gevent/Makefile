@@ -14,4 +14,14 @@ LICENSE  = MIT
 ENV += GEVENTSETUP_EMBED_CARES=FALSE
 ENV += GEVENTSETUP_EMBED_LIBEV=FALSE
 
+ENV += EMBED=false LIBEV_EMBED=false CARES_EMBED=false 
+
 include ../../mk/spksrc.python-wheel.mk
+<<<<<<< HEAD
+=======
+
+.PHONY: gevent_install
+gevent_install:
+	@$(RUN) PYTHONPATH=$(PYTHONPATH) $(HOSTPYTHON) -c "import setuptools;__file__='setup.py';exec(compile(open(__file__).read().replace('\r\n', '\n'), __file__, 'exec'))" bdist_wheel -d $(WORK_DIR)/wheelhouse
+	@rename -f 's/linux_i686/any/g' $(WORK_DIR)/wheelhouse/*.whl
+>>>>>>> ymarting59/3124-update-ffsync
