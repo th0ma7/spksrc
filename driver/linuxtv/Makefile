@@ -64,8 +64,7 @@ else
 # builds can be reproducible
 PKG_VERS      = 0fe857b
 PKG_GIT_HASH  = 0fe857b86addf382f6fd383948bd7736a3201403
-MEDIA_VERSION = 2022-06-05-f2906aa86338
-#MEDIA_VERSION = LATEST
+MEDIA_VERSION = LATEST
 endif
 
 .PHONY: linuxtv_pre_patch
