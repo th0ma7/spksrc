@@ -23,6 +23,10 @@ ADDITIONAL_CFLAGS += -Wno-unused-function
 ADDITIONAL_CFLAGS += -Wno-maybe-uninitialized
 ADDITIONAL_CFLAGS += -Wno-parentheses
 
+ifeq ($(GCC_DEBUG_INFO),1)
+    CMAKE_ARGS += -DCMAKE_DEBUG_POSTFIX=""
+endif
+
 include ../../mk/spksrc.common.mk
 
 ifeq ($(findstring $(ARCH),$(ARMv7_ARCHS)),$(ARCH))
