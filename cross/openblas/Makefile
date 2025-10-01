@@ -24,7 +24,7 @@ ADDITIONAL_CFLAGS += -Wno-maybe-uninitialized
 ADDITIONAL_CFLAGS += -Wno-parentheses
 
 ifeq ($(GCC_DEBUG_INFO),1)
-    CMAKE_ARGS += -DCMAKE_DEBUG_POSTFIX=""
+  CMAKE_ARGS += -DOPENBLAS_DEBUG_SUFFIX=OFF
 endif
 
 include ../../mk/spksrc.common.mk
