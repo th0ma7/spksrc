@@ -1,6 +1,752 @@
 version: 2
 updates:
-- package-ecosystem: "github-actions"
-  directory: "/"
+- package-ecosystem: pip
+  directory: /spk/python314/crossenv
+  requirements-file: requirements-default.txt
   schedule:
-    interval: "weekly"
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python310/crossenv
+  requirements-file: requirements-default.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python312/crossenv
+  requirements-file: requirements-default.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python313/crossenv
+  requirements-file: requirements-default.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python311/crossenv
+  requirements-file: requirements-default.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python311-wheels/src
+  requirements-file: requirements-abi3.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python312-wheels/src
+  requirements-file: requirements-abi3.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python314-wheels/src
+  requirements-file: requirements-abi3.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python313-wheels/src
+  requirements-file: requirements-abi3.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python310-wheels/src
+  requirements-file: requirements-abi3.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python311-wheels/src
+  requirements-file: requirements-crossenv.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python312-wheels/src
+  requirements-file: requirements-crossenv.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python314-wheels/src
+  requirements-file: requirements-crossenv.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python313-wheels/src
+  requirements-file: requirements-crossenv.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python310-wheels/src
+  requirements-file: requirements-crossenv.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python314/src
+  requirements-file: requirements-pure.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python310/src
+  requirements-file: requirements-pure.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python311-wheels/src
+  requirements-file: requirements-pure.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python312/src
+  requirements-file: requirements-pure.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python312-wheels/src
+  requirements-file: requirements-pure.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python313/src
+  requirements-file: requirements-pure.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python311/src
+  requirements-file: requirements-pure.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python314-wheels/src
+  requirements-file: requirements-pure.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python313-wheels/src
+  requirements-file: requirements-pure.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /spk/python310-wheels/src
+  requirements-file: requirements-pure.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /native/python314/src
+  requirements-file: requirements.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /native/python310/src
+  requirements-file: requirements.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /native/python312/src
+  requirements-file: requirements.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /native/python313/src
+  requirements-file: requirements.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /native/python311/src
+  requirements-file: requirements.txt
+  schedule:
+    interval: weekly
+  groups:
+    all-python-deps:
+      patterns:
+      - '*'
+  ignore:
+  - dependency-name: pip
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: Cython
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
+  - dependency-name: msgpack
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+    - version-update:semver-patch
