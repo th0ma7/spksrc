@@ -34,7 +34,7 @@ endif
 endif
 
 # Common directories (must be set after ARCH_SUFFIX)
-include ../../mk/spksrc.directories.mk
+include ../../mk/spksrc.base/directories.mk
 
 # Common makefiles
 include ../../mk/spksrc.common.mk

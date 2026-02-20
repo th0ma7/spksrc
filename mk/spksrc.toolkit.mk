@@ -74,7 +74,7 @@ endif
 #####
 
 # Common directories
-include ../../mk/spksrc.directories.mk
+include ../../mk/spksrc.base/directories.mk
 
 ### Include common definitions
 include ../../mk/spksrc.common.mk
@@ -118,29 +118,29 @@ endif
 
 #####
 
-include ../../mk/spksrc.depend.mk
+include ../../mk/spksrc.base/depend.mk
 
 include ../../mk/spksrc.toolkit/tk-base.mk
 include ../../mk/spksrc.toolkit/tk-flags.mk
 include ../../mk/spksrc.toolkit/tk-url.mk
 include ../../mk/spksrc.toolkit/tk-versions.mk
 
-include ../../mk/spksrc.status.mk
+include ../../mk/spksrc.base/status.mk
 
 download:
-include ../../mk/spksrc.download.mk
+include ../../mk/spksrc.core/download.mk
 
 checksum: download
-include ../../mk/spksrc.checksum.mk
+include ../../mk/spksrc.core/checksum.mk
 
 extract: checksum
-include ../../mk/spksrc.extract.mk
+include ../../mk/spksrc.core/extract.mk
 
 normalize: extract
 include ../../mk/spksrc.toolkit/tk-normalize.mk
 
 patch: normalize
-include ../../mk/spksrc.patch.mk
+include ../../mk/spksrc.core/patch.mk
 
 include ../../mk/spksrc.toolkit/tk_vars.mk
 

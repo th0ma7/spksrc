@@ -23,7 +23,7 @@ endif
 endif
 
 # Common directories (must be set after ARCH_SUFFIX)
-include ../../mk/spksrc.directories.mk
+include ../../mk/spksrc.base/directories.mk
 
 #####
 
@@ -34,24 +34,24 @@ endif
 #####
 
 # to check for supported archs and DSM versions
-include ../../mk/spksrc.pre-check.mk
+include ../../mk/spksrc.base/pre-check.mk
 
 # for common env variables
 include ../../mk/spksrc.cross-env.mk
 
 # for dependency evaluation
-include ../../mk/spksrc.depend.mk
+include ../../mk/spksrc.base/depend.mk
 
 install: depend
-include ../../mk/spksrc.install.mk
+include ../../mk/spksrc.core/install.mk
 
 plist: install
-include ../../mk/spksrc.plist.mk
+include ../../mk/spksrc.core/plist.mk
 
 all: install plist
 
 
 ### For managing make all-<supported|latest>
-include ../../mk/spksrc.supported.mk
+include ../../mk/spksrc.base/supported.mk
 
 ####

@@ -4,7 +4,7 @@ default: all
 
 # Common makefiles
 include ../../mk/spksrc.common.mk
-include ../../mk/spksrc.directories.mk
+include ../../mk/spksrc.base/directories.mk
 
 # Common kernel variables
 include ../../mk/spksrc.kernel-flags.mk
@@ -51,16 +51,16 @@ TC ?= syno-$(KERNEL_ARCH)-$(KERNEL_VERS)
 
 include ../../mk/spksrc.cross-env.mk
 
-include ../../mk/spksrc.download.mk
+include ../../mk/spksrc.core/download.mk
 
 checksum: download
-include ../../mk/spksrc.checksum.mk
+include ../../mk/spksrc.core/checksum.mk
 
 extract: checksum
-include ../../mk/spksrc.extract.mk
+include ../../mk/spksrc.core/extract.mk
 
 patch: extract
-include ../../mk/spksrc.patch.mk
+include ../../mk/spksrc.core/patch.mk
 
 kernel_configure: patch
 include ../../mk/spksrc.cross-kernel-configure.mk
@@ -72,10 +72,10 @@ install: kernel_module
 include ../../mk/spksrc.cross-kernel-headers.mk
 
 install: kernel_headers
-include ../../mk/spksrc.install.mk
+include ../../mk/spksrc.core/install.mk
 
 plist: install
-include ../../mk/spksrc.plist.mk
+include ../../mk/spksrc.core/plist.mk
 
 .PHONY: kernel_post_extract_target
 kernel_post_extract_target:
