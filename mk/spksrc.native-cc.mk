@@ -27,7 +27,7 @@ include ../../mk/spksrc.common.mk
 
 #####
 
-include ../../mk/spksrc.native-env.mk
+include ../../mk/spksrc.native/env.mk
 
 include ../../mk/spksrc.core/download.mk
 
