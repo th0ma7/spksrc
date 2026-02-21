@@ -16,7 +16,7 @@ DIST_EXT      = $(PKG_EXT)
 ARCH_SUFFIX  := -native
 
 # Setup common directories
-include ../../mk/spksrc.base/directories.mk
+include ../../mk/spksrc.common/directories.mk
 
 # Common makefiles
 include ../../mk/spksrc.common.mk
@@ -29,29 +29,29 @@ include ../../mk/spksrc.common.mk
 
 include ../../mk/spksrc.native/env.mk
 
-include ../../mk/spksrc.core/download.mk
+include ../../mk/spksrc.build/download.mk
 
-include ../../mk/spksrc.base/depend.mk
+include ../../mk/spksrc.rules/depend.mk
 
-include ../../mk/spksrc.base/status.mk
+include ../../mk/spksrc.rules/status.mk
 
 checksum: download
-include ../../mk/spksrc.core/checksum.mk
+include ../../mk/spksrc.build/checksum.mk
 
 extract: checksum depend status
-include ../../mk/spksrc.core/extract.mk
+include ../../mk/spksrc.build/extract.mk
 
 patch: extract
-include ../../mk/spksrc.core/patch.mk
+include ../../mk/spksrc.build/patch.mk
 
 configure: patch
-include ../../mk/spksrc.core/configure.mk
+include ../../mk/spksrc.build/configure.mk
 
 compile: configure
-include ../../mk/spksrc.core/compile.mk
+include ../../mk/spksrc.build/compile.mk
 
 install: compile
-include ../../mk/spksrc.core/install.mk
+include ../../mk/spksrc.build/install.mk
 
 ###
 
@@ -76,6 +76,6 @@ all:
 ####
 
 ### Include common rules
-include ../../mk/spksrc.common-rules.mk
+include ../../mk/spksrc.rules.mk
 
 ###

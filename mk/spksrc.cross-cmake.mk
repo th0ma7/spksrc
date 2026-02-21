@@ -26,7 +26,7 @@ endif
 endif
 
 # Common directories (must be set after ARCH_SUFFIX)
-include ../../mk/spksrc.base/directories.mk
+include ../../mk/spksrc.common/directories.mk
 
 # Common makefiles
 include ../../mk/spksrc.common.mk
@@ -50,7 +50,7 @@ CMAKE_SOURCE_DIR = $(CMAKE_BASE_DIR)
 endif
 
 ifeq ($(strip $(CMAKE_USE_NINJA)),1)
-include ../../mk/spksrc.ninja.mk
+include ../../mk/spksrc.build/ninja.mk
 else
 # compile
 ifeq ($(strip $(COMPILE_TARGET)),)

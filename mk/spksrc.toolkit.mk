@@ -74,13 +74,13 @@ endif
 #####
 
 # Common directories
-include ../../mk/spksrc.base/directories.mk
+include ../../mk/spksrc.common/directories.mk
 
 ### Include common definitions
 include ../../mk/spksrc.common.mk
 
 ### Include common rules
-include ../../mk/spksrc.common-rules.mk
+include ../../mk/spksrc.rules.mk
 
 #####
 
@@ -118,29 +118,29 @@ endif
 
 #####
 
-include ../../mk/spksrc.base/depend.mk
+include ../../mk/spksrc.rules/depend.mk
 
 include ../../mk/spksrc.toolkit/tk-base.mk
 include ../../mk/spksrc.toolkit/tk-flags.mk
 include ../../mk/spksrc.toolkit/tk-url.mk
 include ../../mk/spksrc.toolkit/tk-versions.mk
 
-include ../../mk/spksrc.base/status.mk
+include ../../mk/spksrc.rules/status.mk
 
 download:
-include ../../mk/spksrc.core/download.mk
+include ../../mk/spksrc.build/download.mk
 
 checksum: download
-include ../../mk/spksrc.core/checksum.mk
+include ../../mk/spksrc.build/checksum.mk
 
 extract: checksum
-include ../../mk/spksrc.core/extract.mk
+include ../../mk/spksrc.build/extract.mk
 
 normalize: extract
 include ../../mk/spksrc.toolkit/tk-normalize.mk
 
 patch: normalize
-include ../../mk/spksrc.core/patch.mk
+include ../../mk/spksrc.build/patch.mk
 
 include ../../mk/spksrc.toolkit/tk_vars.mk
 
@@ -179,4 +179,4 @@ toolkit: ;
 endif
 
 ### For make digests
-include ../../mk/spksrc.base/generate-digests.mk
+include ../../mk/spksrc.rules/generate-digests.mk

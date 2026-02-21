@@ -30,10 +30,10 @@ rustup:
 ###
 
 ### For make dependency-tree
-include ../../mk/spksrc.base/dependency-tree.mk
+include ../../mk/spksrc.rules/dependency-tree.mk
 
 ### For make digests
-include ../../mk/spksrc.base/generate-digests.mk
+include ../../mk/spksrc.rules/generate-digests.mk
 
 ### For make kernel-required
 include ../../mk/spksrc.kernel-required.mk

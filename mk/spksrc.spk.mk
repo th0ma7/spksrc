@@ -57,7 +57,7 @@ endif
 endif
 
 # Common directories (must be set after ARCH_SUFFIX)
-include ../../mk/spksrc.base/directories.mk
+include ../../mk/spksrc.common/directories.mk
 
 ifeq ($(ARCH),noarch)
 ifneq ($(strip $(TCVERSION)),)
@@ -104,13 +104,13 @@ DEFAULT_ENV = none
 
 #####
 
-include ../../mk/spksrc.base/pre-check.mk
+include ../../mk/spksrc.rules/pre-check.mk
 
 # Even though this makefile doesn't cross compile,
 # we need this to setup the cross environment.
 include ../../mk/spksrc.cross/env-default.mk
 
-include ../../mk/spksrc.base/depend.mk
+include ../../mk/spksrc.rules/depend.mk
 
 copy: depend
 include ../../mk/spksrc.wheel.mk
@@ -625,7 +625,7 @@ pythoncleanall: pythonclean
 	rm -fr work-*/[Pp]ython* work-*/.python*
 
 ### For managing make all-<supported|latest>
-include ../../mk/spksrc.base/supported.mk
+include ../../mk/spksrc.rules/supported.mk
 
 ### For managing make publish-all-<supported|latest>
 include ../../mk/spksrc.spk/publish.mk

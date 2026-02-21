@@ -99,43 +99,43 @@ endif
 .DEFAULT_GOAL := all
 
 # Common directories (must be set after ARCH_SUFFIX)
-include ../../mk/spksrc.base/directories.mk
+include ../../mk/spksrc.common/directories.mk
 
 # Common makefiles
 include ../../mk/spksrc.common.mk
 
 #####
 
-include ../../mk/spksrc.base/pre-check.mk
+include ../../mk/spksrc.rules/pre-check.mk
 
 include ../../mk/spksrc.cross/env-default.mk
 
-include ../../mk/spksrc.core/download.mk
+include ../../mk/spksrc.build/download.mk
 
-include ../../mk/spksrc.base/depend.mk
+include ../../mk/spksrc.rules/depend.mk
 
-include ../../mk/spksrc.base/status.mk
+include ../../mk/spksrc.rules/status.mk
 
 checksum: download
-include ../../mk/spksrc.core/checksum.mk
+include ../../mk/spksrc.build/checksum.mk
 
 extract: checksum depend status
-include ../../mk/spksrc.core/extract.mk
+include ../../mk/spksrc.build/extract.mk
 
 patch: extract
-include ../../mk/spksrc.core/patch.mk
+include ../../mk/spksrc.build/patch.mk
 
 configure: patch
-include ../../mk/spksrc.core/configure.mk
+include ../../mk/spksrc.build/configure.mk
 
 compile: configure
-include ../../mk/spksrc.core/compile.mk
+include ../../mk/spksrc.build/compile.mk
 
 install: compile
-include ../../mk/spksrc.core/install.mk
+include ../../mk/spksrc.build/install.mk
 
 plist: install
-include ../../mk/spksrc.core/plist.mk
+include ../../mk/spksrc.build/plist.mk
 
 #####
 
@@ -187,6 +187,6 @@ all:
 ####
 
 ### For arch-* and all-<supported|latest>
-include ../../mk/spksrc.base/supported.mk
+include ../../mk/spksrc.rules/supported.mk
 
 ####

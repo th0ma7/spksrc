@@ -89,7 +89,7 @@ include ../../mk/spksrc.wheel-install.mk
 
 post_compile_target: $(COMPILE_TARGET)
 
-# Call spksrc.core/compile.mk cookie creation recipe
+# Call spksrc.build/compile.mk cookie creation recipe
 ifeq ($(wildcard $(COMPILE_COOKIE)),)
 compile: $(COMPILE_COOKIE)
 endif
@@ -98,7 +98,7 @@ endif
 
 post_install_target: $(INSTALL_TARGET)
 
-# Call spksrc.core/install.mk cookie creation recipe
+# Call spksrc.build/install.mk cookie creation recipe
 ifeq ($(wildcard $(INSTALL_COOKIE)),)
 install: $(INSTALL_COOKIE)
 
