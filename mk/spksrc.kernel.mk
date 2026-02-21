@@ -49,7 +49,7 @@ TC ?= syno-$(KERNEL_ARCH)-$(KERNEL_VERS)
 
 #####
 
-include ../../mk/spksrc.cross-env.mk
+include ../../mk/spksrc.cross/env-default.mk
 
 include ../../mk/spksrc.core/download.mk
 

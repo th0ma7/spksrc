@@ -24,10 +24,10 @@ include ../../mk/spksrc.common.mk
 MESON_PYTHON = 1
 
 # meson specific configurations
-include ../../mk/spksrc.cross-meson-env.mk
+include ../../mk/spksrc.cross/env-meson.mk
 
 # meson cross-file usage definition
-include ../../mk/spksrc.cross-meson-crossfile.mk
+include ../../mk/spksrc.cross/meson-crossfile.mk
 
 # 1- Prepare the crossenv
 # 2- Generate the per-dependency cross-file definition

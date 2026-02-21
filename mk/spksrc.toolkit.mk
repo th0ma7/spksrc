@@ -25,7 +25,7 @@
 #  status      : echo status to logging facility
 #  patch       : normalize and patch extracted toolkit sources
 #  depend      : resolve and build toolkit dependencies (if any)
-#  tkvars      : generate tk_vars.mk for spksrc.cross-env.mk
+#  tkvars      : generate tk_vars.mk for spksrc.cross/env-default.mk
 #
 # Variables:
 #  TK_NAME           : Toolkit name (optional, used with generic archs)
@@ -179,4 +179,4 @@ toolkit: ;
 endif
 
 ### For make digests
-include ../../mk/spksrc.generate-digests.mk
+include ../../mk/spksrc.base/generate-digests.mk
