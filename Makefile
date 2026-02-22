@@ -1,6 +1,6 @@
 
 # Include framework self-test
-include mk/spksrc.test-rules.mk
+include mk/spksrc.rules/tests.mk
 include mk/spksrc.base/dependency-tree.mk
 
 AVAILABLE_TCS = $(notdir $(wildcard toolchain/syno-*))
