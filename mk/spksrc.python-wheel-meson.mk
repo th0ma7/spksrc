@@ -123,10 +123,10 @@ install_meson_python_wheel:
 include ../../mk/spksrc.crossenv.mk
 
 ## python wheel specific configurations
-include ../../mk/spksrc.wheel-env.mk
+include ../../mk/spksrc.wheel/env.mk
 
 ## install wheel specific routines
-include ../../mk/spksrc.wheel-install.mk
+include ../../mk/spksrc.wheel/install.mk
 
 ###
 
