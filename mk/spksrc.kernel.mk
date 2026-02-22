@@ -7,7 +7,7 @@ include ../../mk/spksrc.common.mk
 include ../../mk/spksrc.common/directories.mk
 
 # Common kernel variables
-include ../../mk/spksrc.kernel-flags.mk
+include ../../mk/spksrc.kernel/flags.mk
 
 # Configure the included makefiles
 NAME          = $(KERNEL_NAME)
