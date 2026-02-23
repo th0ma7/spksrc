@@ -124,8 +124,8 @@ $(error Set STARTABLE=no or provide either SERVICE_COMMAND, SSS_SCRIPT, SPK_COMM
 endif
 endif
 
-SPKSRC_MK = $(realpath $(WORK_DIR)/../../../mk)
-SPKSRC_SERVICE_MK = $(realpath $(SPKSRC_MK)/spksrc.service)
+SPKSRC_MK := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+SPKSRC_SERVICE_MK := $(realpath $(SPKSRC_MK)/spksrc.service)
 
 SERVICE_FILES =
 
