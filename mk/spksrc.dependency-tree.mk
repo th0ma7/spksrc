@@ -8,11 +8,17 @@
 #  - Parallel execution using GNU make job server
 #  - Deterministic, sorted output
 #  - Per-run temporary directories to avoid collisions
+#  - Optional dependency subtree exclusion
 #
-# Main Targets:
+# Root-level Targets (available only when BASEDIR is empty):
+#  dependency-list-spk
+#      Runs dependency-list for every package under spk/* in parallel and
+#      aggregates the results into a sorted output.
+#
+# Package-level Targets (available inside cross|spk|diyspk|toolchain directories):
 #  dependency-tree
-#      Recursively prints a dependency tree. Indentation reflects the current
-#      MAKELEVEL and visualizes dependency depth.
+#      Recursively prints a dependency tree. Indentation reflects MAKELEVEL
+#      and visualizes dependency depth.
 #
 #  dependency-flat
 #      Wrapper around dependency-flat-mk. Enables parallel execution and
@@ -24,10 +30,6 @@
 #      Output format:
 #          $(NAME): cross/foo cross/bar native/baz ...
 #
-#  dependency-list-spk
-#      Runs dependency-list for every package under spk/* in parallel and
-#      aggregates the results into a sorted output.
-#
 # Supporting Targets:
 #  dependency-flat-mk
 #      Aggregates all dependencies for the current package by recursively
@@ -35,11 +37,11 @@
 #
 #  dep-flat-mk-%
 #      Processes a single dependency. Each dependency is visited only once
-#      per run, using stamp files stored in a temporary directory.
+#      per run using stamp files stored in a temporary directory.
 #
 #  dependency-list-spk-%
-#      Executes dependency-list for a single spk package. The output is written
-#      to a per-run temporary file and later aggregated by dependency-list-spk.
+#      Executes dependency-list for a single spk package. Output is written
+#      to a temporary file and later aggregated by dependency-list-spk.
 #
 # Variables:
 #          ALL_DEPENDS: Sorted list of all dependencies (BUILD, DEPENDS, OPTIONAL).
@@ -48,16 +50,22 @@
 #               RUN_ID: Unique identifier for the current dependency traversal run.
 #   DEP_FLAT_STAMP_DIR: Temporary directory used to cache visited dependencies during
 #                       dependency-flat traversal.
-#   SPK_LIST_STAMP_DIR: Temporary directory used to store per-package dependency-list output
+#   SPK_LIST_STAMP_DIR: Temporary directory used to store per-package dependency output
 #                       files during dependency-list-spk execution.
+#      EXCLUDE_DEPENDS: Optional space-separated list of dependencies to ignore
+#                       during traversal (e.g. "cross/ffmpeg7"). Excluded
+#                       dependencies and their entire subtrees are skipped.
 #
 # Notes:
+#  - Target availability depends on call context:
+#        * Root level (BASEDIR empty): dependency-list-spk only
+#        * Package directories: dependency-tree, dependency-flat, dependency-list
 #  - Packages with conditional dependencies must define OPTIONAL_DEPENDS
 #    to ensure all possible dependencies are discovered.
-#  - All targets recursively invoke make. Makefiles must not abort or emit
-#    errors when DEPENDENCY_WALK=1 is set (although errors redirected to /dev/null)
-#  - Temporary directories are unique per run and removed automatically after completion.
-#  - Avoids output interleaving to ensures safe parallelism.
+#  - Recursive make calls must not abort when DEPENDENCY_WALK=1 is set
+#    (errors are redirected to /dev/null).
+#  - Temporary directories are unique per run and removed automatically.
+#  - Output interleaving is avoided to ensure safe parallel execution.
 ###############################################################################
 
 # -------------------------------------------------------------------
@@ -161,16 +169,29 @@ dependency-flat-mk: $(DEP_FLAT_TARGETS_MK)
 
 # -------------------------------------------------------------------
 # dep-flat-mk-%
-# Processes a single dependency and caches the result using a stamp file
+# Processes a single dependency during dependency-flat traversal.
+#
+#  - Decodes the dependency name from the target ( __ → / ).
+#  - Skips the dependency if it appears in EXCLUDE_DEPENDS.
+#  - Uses a stamp file in DEP_FLAT_STAMP_DIR to avoid revisiting
+#    dependencies during the same run.
+#  - Recursively invokes dependency-flat-mk in the dependency directory.
+#
+# EXCLUDE_DEPENDS may contain a space-separated list of dependencies
+# (e.g. "cross/ffmpeg7") whose entire subtrees will be ignored.
 # -------------------------------------------------------------------
 .PHONY: dep-flat-mk-%
 dep-flat-mk-%: | $(DEP_FLAT_STAMP_DIR)
-	@stamp=$(DEP_FLAT_STAMP_DIR)/$*; \
+	@dep=$(subst __,/,$*); \
+	case " $(EXCLUDE_DEPENDS) " in \
+	   *" $$dep "*) exit 0 ;; \
+	esac; \
+	stamp=$(DEP_FLAT_STAMP_DIR)/$*; \
 	if [ -f $$stamp ]; then exit 0; fi; \
 	touch $$stamp; \
 	DEPENDENCY_WALK=1 \
 	$(MAKE) -s --output-sync=target \
-		-C ../../$(subst __,/,$*) dependency-flat-mk
+		-C ../../$$dep dependency-flat-mk
 
 # -------------------------------------------------------------------
 # dependency-list
