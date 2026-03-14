@@ -43,7 +43,7 @@ DEPENDS += python/pendulum
 # [PyYAML]
 DEPENDS += cross/libyaml
 
-include ../../mk/spksrc.spk-python.mk
+include ../../mk/spksrc.spk-meta.mk
 
 # [greenlet]
 # sqlalchemy has requirement "greenlet >=1", so it is ok to build older version with older toolchains

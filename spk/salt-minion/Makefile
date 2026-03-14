@@ -40,7 +40,7 @@ DEPENDS += cross/openssl3
 # [PyYAML]
 DEPENDS += cross/libyaml
 
-include ../../mk/spksrc.spk-python.mk
+include ../../mk/spksrc.spk-meta.mk
 
 # [aiohttp]
 ifeq ($(call version_lt, $(TC_GCC), 5.0),1)

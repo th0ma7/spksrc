@@ -43,7 +43,7 @@ ENV += SODIUM_INSTALL=system
 # [PyYAML]
 DEPENDS += cross/libyaml
 
-include ../../mk/spksrc.spk-python.mk
+include ../../mk/spksrc.spk-meta.mk
 
 # [lxml]
 DEPENDS += cross/libxml2
