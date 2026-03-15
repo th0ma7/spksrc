@@ -37,7 +37,7 @@ POST_STRIP_TARGET = sickchill_extra_install
 # [cryptography]
 DEPENDS += cross/openssl3
 
-include ../../mk/spksrc.spk-meta.mk
+include ../../mk/spksrc.common.mk
 
 # [greenlet]
 ifeq ($(call version_ge, $(TC_GCC), 5.0),1)
@@ -58,6 +58,8 @@ endif
 ifeq ($(call version_lt, $(TC_GCC), 5.0),1)
 WHEELS_CFLAGS += [msgpack] -std=c11
 endif
+
+include ../../mk/spksrc.spk-meta.mk
 
 .PHONY: sickchill_extra_install
 sickchill_extra_install:
