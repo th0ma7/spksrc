@@ -43,7 +43,7 @@ ENV += MYSQLCLIENT_LDFLAGS="$(LDFLAGS)"
 
 POST_STRIP_TARGET = ffsync_extra_install
 
-include ../../mk/spksrc.spk-meta.mk
+include ../../mk/spksrc.common.mk
 
 # [greenlet]
 # version >= 3.1: gcc >= 8   (DSM7.1) Mandatory require full c++20 support
@@ -55,6 +55,8 @@ else ifeq ($(call version_ge, $(TC_GCC), 4.9)$(call version_lt, $(TC_GCC), 5.0),
 WHEELS += greenlet==3.0.3
 WHEELS_CPPFLAGS += [greenlet] -std=c++11 -fpermissive
 endif
+
+include ../../mk/spksrc.spk-meta.mk
 
 .PHONY: ffsync_extra_install
 ffsync_extra_install:

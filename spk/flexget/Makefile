@@ -36,13 +36,13 @@ USE_ALTERNATE_TMPDIR = 1
 
 SPK_USR_LOCAL_LINKS = bin:env/bin/flexget bin:env/bin/flexget-headless
 
-# [Pendulum]
-DEPENDS += python/pendulum
-
 # [PyYAML]
 DEPENDS += cross/libyaml
 
-include ../../mk/spksrc.spk-meta.mk
+# [Pendulum]
+DEPENDS += python/pendulum
+
+include ../../mk/spksrc.common.mk
 
 # [greenlet]
 # sqlalchemy has requirement "greenlet >=1", so it is ok to build older version with older toolchains
@@ -52,6 +52,8 @@ else
 WHEELS += src/requirements-crossenv-greenlet-v3-gcc4.txt
 WHEELS_CPPFLAGS += [greenlet] -std=c++11 -fpermissive
 endif
+
+include ../../mk/spksrc.spk-meta.mk
 
 .PHONY: flexget_extra_install
 flexget_extra_install:

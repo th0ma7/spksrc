@@ -41,7 +41,7 @@ USE_ALTERNATE_TMPDIR = 1
 # [Pillow]
 DEPENDS += python/pillow
 
-include ../../mk/spksrc.spk-meta.mk
+include ../../mk/spksrc.common.mk
 
 # [lxml]
 DEPENDS += cross/libxml2
@@ -56,3 +56,5 @@ endif
 ifeq ($(call version_gt, $(TC_GCC), 8.4),1)
 DEPENDS += python/numpy
 endif
+
+include ../../mk/spksrc.spk-meta.mk

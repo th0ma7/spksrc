@@ -130,8 +130,6 @@ else
 WHEELS += rpds_py==0.25.1
 endif
 
-include ../../mk/spksrc.spk-meta.mk
-
 # [atom]
 # Requires
 #  - build:setuptools-scm
@@ -206,3 +204,5 @@ endif
 ifeq ($(call version_ge, $(TC_GCC), 5.0),1)
 DEPENDS += python/pygobject
 endif
+
+include ../../mk/spksrc.spk-meta.mk

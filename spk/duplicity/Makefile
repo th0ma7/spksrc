@@ -42,7 +42,7 @@ ENV += SODIUM_INSTALL=system
 # [PyYAML]
 DEPENDS += cross/libyaml
 
-include ../../mk/spksrc.spk-meta.mk
+include ../../mk/spksrc.common.mk
 
 # [lxml]
 DEPENDS += cross/libxml2
@@ -59,3 +59,5 @@ endif
 # [duplicity]
 #   - To be built last
 DEPENDS += python/duplicity
+
+include ../../mk/spksrc.spk-meta.mk

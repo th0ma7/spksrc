@@ -94,8 +94,6 @@ else
 WHEELS += rpds_py==0.25.1
 endif
 
-include ../../mk/spksrc.spk-meta.mk
-
 # [borgbackup]
 # Use OpenSSL path as defined by either
 # spksrc.wheel-env.mk or spksrc.spk-meta.mk
@@ -182,3 +180,5 @@ endif
 ifeq ($(call version_lt, $(TC_GCC), 5.0),1)
 WHEELS_CFLAGS += [ruamel.yaml.clib] -std=c11
 endif
+
+include ../../mk/spksrc.spk-meta.mk
