@@ -36,6 +36,7 @@
 #
 ###############################################################################
 
+
 # Set basedir in case called from spkrc/ or from normal sub-dir
 # Note that github-action uses workspace/ in place of spksrc/
 ifeq ($(BASEDIR),)
@@ -43,6 +44,24 @@ ifeq ($(filter spksrc workspace,$(shell basename $(CURDIR))),)
 BASEDIR = ../../
 endif
 endif
+
+ifneq ($(ARCH),)
+ARCH_SUFFIX = -$(ARCH)-$(TCVERSION)
+endif
+
+# Common directories (must be set after ARCH_SUFFIX)
+include ../../mk/spksrc.directories.mk
+
+# Load toolchain variables early (provides TC_GCC, TC_VERS, TC_ARCH etc.)
+# - if TC does not exists then tc_vars.mk is not generated yet
+# - this occurs when MAKECMDGOALS is empty pre-stage1|2
+ifeq ($(TC),)
+ifeq ($(MAKECMDGOALS),)
+  $(shell mkdir -p $(WORK_DIR))
+  $(shell $(MAKE) --no-print-directory -C $(WORK_DIR)/$(BASEDIR)/../toolchain/syno-$(ARCH)-$(TCVERSION) tc_vars | grep -v '===>' > $(WORK_DIR)/tc_vars.mk 2>/dev/null)
+endif
+endif
+-include $(WORK_DIR)/tc_vars.mk
 
 # Load common definitions
 include $(BASEDIR)mk/spksrc.common/archs.mk
