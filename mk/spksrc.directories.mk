@@ -1,5 +1,3 @@
-# Include macro definitions
-include ../../mk/spksrc.common/macros.mk
 
 # * all goes in $(WORK_DIR) : work-arch (for noarch: work-all or work-dsm7), in the current directory
 # * it will be installed in $(INSTALL_PREFIX) on the target system (/usr/local/transmission)
@@ -64,7 +62,7 @@ endif
 # when invoking make from under spk/*.  Setting var when
 # test-building dependencies from under cross/* is unecessary.
 #
-ifeq ($(call version_ge, ${TCVERSION}, 7.0),1)
+ifeq ($(shell if printf '%s\n' "${TCVERSION}" "7.0" | sort -VCr ; then echo 1; fi),1)
 ifeq ($(lastword $(subst /, ,$(INSTALL_PREFIX))),target)
 INSTALL_PREFIX_VAR = $(shell dirname $(INSTALL_PREFIX))/var
 endif

@@ -50,7 +50,12 @@ ARCH_SUFFIX = -$(ARCH)-$(TCVERSION)
 endif
 
 # Common directories (must be set after ARCH_SUFFIX)
-include ../../mk/spksrc.directories.mk
+include $(BASEDIR)mk/spksrc.directories.mk
+
+# Load common definitions
+include $(BASEDIR)mk/spksrc.common/archs.mk
+include $(BASEDIR)mk/spksrc.common/logs.mk
+include $(BASEDIR)mk/spksrc.common/macros.mk
 
 # Load toolchain variables early (provides TC_GCC, TC_VERS, TC_ARCH etc.)
 # - if TC does not exists then tc_vars.mk is not generated yet
@@ -62,11 +67,6 @@ ifeq ($(MAKECMDGOALS),)
 endif
 endif
 -include $(WORK_DIR)/tc_vars.mk
-
-# Load common definitions
-include $(BASEDIR)mk/spksrc.common/archs.mk
-include $(BASEDIR)mk/spksrc.common/logs.mk
-include $(BASEDIR)mk/spksrc.common/macros.mk
 
 # Load local configuration
 LOCAL_CONFIG_MK = $(BASEDIR)local.mk
