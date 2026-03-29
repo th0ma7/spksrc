@@ -135,7 +135,9 @@ endif
 # set OPENSSL_*_PREFIX if unset
 ifeq ($(strip $(OPENSSL_STAGING_INSTALL_PREFIX)),)
 OPENSSL_STAGING_INSTALL_PREFIX = $(PYTHON_STAGING_INSTALL_PREFIX)
-OPENSSL_PREFIX = $(PYTHON_INSTALL_PREFIX)
+endif
+ifeq ($(strip $(OPENSSL_INSTALL_PREFIX)),)
+OPENSSL_INSTALL_PREFIX = $(PYTHON_INSTALL_PREFIX)
 endif
 
 # Mandatory for rustc wheel building at crossenv preparation time
