@@ -8,7 +8,7 @@
 # - Build all packages defined by ${USER_SPK_TO_BUILD} and ${GH_SPK_PACKAGES}
 # - Evaluate additional packages to build depending on changed folders defined in ${GH_DEPENDENT_PACKAGES}.
 # - synocli-videodriver is moved to head of packages to build first if triggered by its ffmpeg5-7
-# - python310-313 and ffmpeg5-7 are moved to head of remaining packages to build when triggered by its own or a dependent.
+# - python310-314 and ffmpeg5-7 are moved to head of remaining packages to build when triggered by its own or a dependent.
 # - Referenced native and cross packages of the packages to build are added to the download list.
 
 set -o pipefail
@@ -90,8 +90,8 @@ do
     fi
 done
 
-# for python (310, 311, 312, 313) find all packages that depend on them
-for py in python310 python311 python312 python313; do
+# for python (310, 311, 312, 313, 314) find all packages that depend on them
+for py in python310 python311 python312 python313 python314; do
     python_dependent_packages=$(find spk/ -maxdepth 2 -mindepth 2 -name "Makefile" -exec grep -Ho "PYTHON_PACKAGE = ${py}" {} \; | grep -Po ".*spk/\K[^/]*" | sort | tr '\n' ' ')
 
     # If packages contain a package that depends on python (or is python), then ensure
