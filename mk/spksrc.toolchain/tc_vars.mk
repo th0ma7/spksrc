@@ -375,6 +375,8 @@ tc_rust_vars:
 #   endif
 #
 # Both are forwarded to this generation by cross-cc.mk / native-cc.mk / kernel.mk.
+# The default lives in spksrc.common/tc-capability.mk so the package side and this
+# generation cannot disagree; repeated here only for a standalone parse.
 LEGACY_TOOLCHAIN ?= 1
 
 ifeq ($(filter 1 on ON,$(strip $(LEGACY_TOOLCHAIN))),)

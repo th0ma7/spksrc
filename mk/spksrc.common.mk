@@ -66,6 +66,11 @@ include $(BASEDIR)/mk/spksrc.common/logs.mk
 LOCAL_CONFIG_MK = $(BASEDIR)/local.mk
 -include $(LOCAL_CONFIG_MK)
 
+# Toolchain capabilities (MIN_GCC_VERSION / MIN_GLIBC_VERSION). After local.mk so
+# a fleet-wide LEGACY_TOOLCHAIN is visible, and before the package resumes parsing
+# so it can branch on TC_GCC_EFFECTIVE.
+include $(BASEDIR)/mk/spksrc.common/tc-capability.mk
+
 ###
 
 # all will be the default target, regardless of what is defined
