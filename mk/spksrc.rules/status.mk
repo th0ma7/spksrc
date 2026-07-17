@@ -49,20 +49,29 @@ pre_status_target:
 # _status_comma: a literal comma cannot be written inside $(if ...) -- make reads it
 # as an argument separator.
 _status_comma := ,
-STATUS_GCC = $(if $(strip $(TC_GCC)),GCC: $(strip $(TC_GCC)) ($(if $(strip $(TC_GCC_SUFFIX)),overlay,legacy))$(_status_comma) )
+STATUS_GCC = $(shell printf '%-23s' "$(if $(strip $(TC_GCC)),GCC: $(strip $(TC_GCC)) ($(if $(strip $(TC_GCC_SUFFIX)),overlay,legacy))$(_status_comma))")
+
+# The arch label is STATUS_ARCH (logs.mk), which also names the log file -- logs.mk
+# says the two "can never disagree", and they did: every branch below re-derived the
+# label by hand, and the toolchain one dropped STATUS_ARCH's fallback to TC_ARCH. An
+# overlay package sets TC_ARCH but no TC_NAME, so it logged "ARCH: -6.2.4". Derive it
+# once, in the place that already owns it.
+#
+# Widths: 18 is the longest arch-vers in the tree (broadwellntbap-7.3) and 22 the
+# widest GCC field (gcc 12 on the overlay), both plus their comma. Padding is why the
+# printf output must be quoted when handed to MSG -- unquoted, the shell word-splits
+# it and collapses exactly the spaces being added.
+STATUS_NAME = $(NAME)
+ifeq ($(notdir $(abspath $(CURDIR)/..)),toolchain)
+STATUS_NAME = toolchain
+else ifeq ($(notdir $(abspath $(CURDIR)/..)),toolkit)
+STATUS_NAME = toolkit
+else ifeq ($(notdir $(abspath $(CURDIR)/..)),kernel)
+STATUS_NAME = kernel
+endif
 
 status_target:  $(PRE_STATUS_TARGET)
-ifeq ($(notdir $(abspath $(CURDIR)/..)),native)
-	@$(MSG) $$(printf "%s MAKELEVEL: %02d, PARALLEL_MAKE: %s, %sARCH: %s, NAME: %s\n" "$$(date +%Y%m%d-%H%M%S)" $(MAKELEVEL) "$(PARALLEL_MAKE)" "$(STATUS_GCC)" "$(STATUS_ARCH)" "$(NAME)") | tee --append $(STATUS_LOG)
-else ifeq ($(notdir $(abspath $(CURDIR)/..)),toolchain)
-	@$(MSG) $$(printf "%s MAKELEVEL: %02d, PARALLEL_MAKE: %s, %sARCH: %s, NAME: %s\n" "$$(date +%Y%m%d-%H%M%S)" $(MAKELEVEL) "$(PARALLEL_MAKE)" "$(STATUS_GCC)" "$(lastword $(subst -, ,$(TC_NAME)))-$(TC_VERS)" "toolchain") | tee --append $(STATUS_LOG)
-else ifeq ($(notdir $(abspath $(CURDIR)/..)),toolkit)
-	@$(MSG) $$(printf "%s MAKELEVEL: %02d, PARALLEL_MAKE: %s, %sARCH: %s, NAME: %s\n" "$$(date +%Y%m%d-%H%M%S)" $(MAKELEVEL) "$(PARALLEL_MAKE)" "$(STATUS_GCC)" "$(lastword $(subst -, ,$(TK_NAME)))-$(TK_VERS)" "toolkit") | tee --append $(STATUS_LOG)
-else ifeq ($(notdir $(abspath $(CURDIR)/..)),kernel)
-	@$(MSG) $$(printf "%s MAKELEVEL: %02d, PARALLEL_MAKE: %s, %sARCH: %s, NAME: %s\n" "$$(date +%Y%m%d-%H%M%S)" $(MAKELEVEL) "$(PARALLEL_MAKE)" "$(STATUS_GCC)" "$(lastword $(subst -, ,$(KERNEL_NAME)))-$(KERNEL_VERS)" "kernel") | tee --append $(STATUS_LOG)
-else
-	@$(MSG) $$(printf "%s MAKELEVEL: %02d, PARALLEL_MAKE: %s, %sARCH: %s, NAME: %s\n" "$$(date +%Y%m%d-%H%M%S)" $(MAKELEVEL) "$(PARALLEL_MAKE)" "$(STATUS_GCC)" "$(ARCH)-$(TCVERSION)" "$(NAME)") | tee --append $(STATUS_LOG)
-endif
+	@$(MSG) "$$(printf "%s MAKELEVEL: %02d, PARALLEL_MAKE: %s, %sARCH: %-19s NAME: %s" "$$(date +%Y%m%d-%H%M%S)" $(MAKELEVEL) "$(PARALLEL_MAKE)" "$(STATUS_GCC)" "$(STATUS_ARCH)$(_status_comma)" "$(STATUS_NAME)")" | tee --append $(STATUS_LOG)
 
 post_status_target: $(STATUS_TARGET)
 
