@@ -48,11 +48,25 @@ ifneq ($(strip $(ARCH))$(strip $(TCVERSION)),)
 
 _TC_CAP_MK := $(BASEDIR)/toolchain/syno-$(ARCH)-$(TCVERSION)/Makefile
 
-# gcc493 -> 4.9.3, gcc750 -> 7.5.0, and a future gcc1230 -> 12.3.0: the last two
-# digits are minor and patch, whatever is left is the major.
+# Decode the gcc token of a TC_DIST. Three real shapes exist in the tree:
+#
+#   gcc493  gcc750  gcc850     3 digits -> 4.9.3  7.5.0  8.5.0
+#   gcc1030 gcc1220            4 digits -> 10.3.0 12.2.0     (two-digit major)
+#   gcc4374                    4 digits -> 4.3.7            (legacy DSM 5.2 form,
+#                                                            trailing build digit)
+#
+# The 4-digit case is ambiguous, and getting it wrong is not cosmetic: reading
+# gcc4374 as "43.7.4" makes an arch stuck on gcc 4.3.7 satisfy every conceivable
+# MIN_GCC_VERSION -- the guard would wave through exactly what it exists to stop.
+# Disambiguated on the major: 10 and 12 are plausible gcc majors, 43 is not.
+# Anything up to 20 is treated as a major, which leaves room for gcc to keep
+# counting for a while.
 TC_STOCK_GCC := $(shell sed -n 's/^TC_DIST *= *//p' $(_TC_CAP_MK) 2>/dev/null | \
-                  sed -n 's/.*-gcc\([0-9]\+\)_.*/\1/p' | \
-                  sed -E 's/^([0-9]+)([0-9])([0-9])$$/\1.\2.\3/')
+                  sed -n 's/.*-gcc\([0-9]\+\)[_-].*/\1/p' | \
+                  awk '{ n=length($$0); \
+                         if (n==3) { printf "%s.%s.%s", substr($$0,1,1), substr($$0,2,1), substr($$0,3,1) } \
+                         else if (n==4 && substr($$0,1,2)+0 <= 20) { printf "%s.%s.%s", substr($$0,1,2), substr($$0,3,1), substr($$0,4,1) } \
+                         else if (n>=4) { printf "%s.%s.%s", substr($$0,1,1), substr($$0,2,1), substr($$0,3,1) } }')
 TC_STOCK_GLIBC := $(shell sed -n 's/^TC_GLIBC *= *//p' $(_TC_CAP_MK) 2>/dev/null)
 
 # An overlay package existing is the declaration that this gcc is available here.
