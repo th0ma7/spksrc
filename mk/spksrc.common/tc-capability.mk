@@ -68,26 +68,25 @@ endif
 endif
 
 # ---- gcc: liftable by an overlay --------------------------------------------
+# Step 1: pick the compiler. If the stock gcc is too old but an overlay would do,
+# and nobody said otherwise, select it -- the package declares a need, and picking
+# a toolchain that satisfies it is the framework's job, not the package's. An
+# explicit LEGACY_TOOLCHAIN is left untouched here and therefore wins.
 ifneq ($(strip $(MIN_GCC_VERSION)),)
 ifneq ($(strip $(TC_STOCK_GCC)),)
 ifeq ($(call version_ge,$(TC_STOCK_GCC),$(MIN_GCC_VERSION)),)
-# stock is too old -- can an overlay satisfy it?
-ifeq ($(call version_ge,$(TC_OVERLAY_GCC),$(MIN_GCC_VERSION)),)
-TC_CAPABILITY_UNSUPPORTED := gcc $(TC_STOCK_GCC) < $(MIN_GCC_VERSION)$(if $(TC_OVERLAY_GCC), and the $(TC_OVERLAY_GCC) overlay is not enough, and no gcc overlay exists here)
-else ifeq ($(_TC_LEGACY_EXPLICIT),)
-# The package asked for a capability an overlay provides, and nobody said
-# otherwise: select it. Picking the toolchain that satisfies a stated requirement
-# is the framework's job -- the package should not have to know overlays exist.
-# An explicit LEGACY_TOOLCHAIN still wins (it is left untouched here).
+ifneq ($(call version_ge,$(TC_OVERLAY_GCC),$(MIN_GCC_VERSION)),)
+ifeq ($(_TC_LEGACY_EXPLICIT),)
 LEGACY_TOOLCHAIN := 0
+endif
 endif
 endif
 endif
 endif
 
 # Default: the toolchain's stock gcc, so an installed overlay stays inactive.
-# Applied last, so MIN_GCC_VERSION above can lift it. Defined here rather than in
-# tc_vars.mk so the package side and the toolchain side cannot disagree about
+# Applied after step 1, so MIN_GCC_VERSION can lift it. Defined here rather than
+# in tc_vars.mk so the package side and the toolchain side cannot disagree about
 # what "default" means.
 LEGACY_TOOLCHAIN ?= 1
 
@@ -95,6 +94,31 @@ LEGACY_TOOLCHAIN ?= 1
 # logic should branch on this rather than on the TC_GCC that tc_vars reports back
 # after the fact -- that one depends on how the toolchain happened to be built.
 TC_GCC_EFFECTIVE := $(if $(filter 1 on ON,$(strip $(LEGACY_TOOLCHAIN))),$(TC_STOCK_GCC),$(or $(strip $(TC_GCC_VERSION)),$(TC_OVERLAY_GCC),$(TC_STOCK_GCC)))
+
+# Step 2: judge the compiler that was actually picked, not the one that could
+# have been. Checking "could an overlay satisfy this?" would wave through a build
+# that then compiles with the stock gcc anyway -- forced there by an explicit
+# LEGACY_TOOLCHAIN=1, or by a TC_GCC_VERSION pinned too low. That is exactly the
+# failure this variable exists to prevent: without it the build dies much later,
+# deep inside a source file, with a diagnostic that names neither the toolchain
+# nor the requirement.
+# Plain ifeq rather than a nested $(if): the messages contain commas, and make
+# reads those as argument separators.
+ifneq ($(strip $(MIN_GCC_VERSION)),)
+ifneq ($(strip $(TC_GCC_EFFECTIVE)),)
+ifeq ($(call version_ge,$(TC_GCC_EFFECTIVE),$(MIN_GCC_VERSION)),)
+
+ifneq ($(call version_ge,$(TC_OVERLAY_GCC),$(MIN_GCC_VERSION)),)
+TC_CAPABILITY_UNSUPPORTED := gcc $(TC_GCC_EFFECTIVE) < $(MIN_GCC_VERSION); the $(TC_OVERLAY_GCC) overlay would satisfy it but the stock gcc was forced (LEGACY_TOOLCHAIN)
+else ifneq ($(strip $(TC_OVERLAY_GCC)),)
+TC_CAPABILITY_UNSUPPORTED := gcc $(TC_GCC_EFFECTIVE) < $(MIN_GCC_VERSION); the $(TC_OVERLAY_GCC) overlay is not enough either
+else
+TC_CAPABILITY_UNSUPPORTED := gcc $(TC_GCC_EFFECTIVE) < $(MIN_GCC_VERSION); no gcc overlay exists for this toolchain
+endif
+
+endif
+endif
+endif
 
 else
 # No ARCH/TCVERSION (toolchain build, noarch, ...): only the default applies.
