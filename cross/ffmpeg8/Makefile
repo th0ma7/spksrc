@@ -11,7 +11,10 @@ COMMENT  = FFmpeg is a complete, cross-platform solution to record, convert and 
 LICENSE  = GPLv2
 
 # requires c11 and proper atomic using gcc-4.9+ support
-UNSUPPORTED_ARCHS = $(ARMv5_ARCHS) $(ARMv7L_ARCHS) $(OLD_PPC_ARCHS)
+# ARMv5 (gcc 4.6.4), ARMv7L (4.8.3) and the old PPC (4.3.7) toolchains were listed
+# here; what they have in common is a stock gcc below 4.9, which is where ffmpeg
+# stopped building (4.4 still took gcc 4.6). Stating that lets an overlay lift it.
+MIN_GCC_VERSION = 4.9
 
 include ../../mk/spksrc.common.mk
 
