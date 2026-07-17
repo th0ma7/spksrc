@@ -10,7 +10,7 @@ HOMEPAGE = https://github.com/Netflix/vmaf
 COMMENT  = VMAF is an Emmy-winning perceptual video quality assessment algorithm developed by Netflix.
 LICENSE  = SPDX short identifier: BSD-2-Clause-Patent
 
-MIN_GCC_VERSION = 7
+MIN_GCC_VERSION = 7.5
 REQUIRED_MIN_SRM = 1.3
 
 MESON_BASE_DIR = $(WORK_DIR)/$(PKG_DIR)/$(PKG_NAME)

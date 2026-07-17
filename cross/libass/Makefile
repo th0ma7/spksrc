@@ -8,7 +8,7 @@ PKG_DIR = $(PKG_NAME)-$(PKG_VERS)
 DEPENDS = cross/freetype cross/fribidi cross/fontconfig cross/harfbuzz cross/libunibreak
 
 # harfbuzz
-UNSUPPORTED_ARCHS = $(ARMv5_ARCHS) $(OLD_PPC_ARCHS)
+MIN_GCC_VERSION = 4.8
 
 HOMEPAGE = https://github.com/libass/libass
 COMMENT  = libass is a portable subtitle renderer for the ASS/SSA (Advanced Substation Alpha/Substation Alpha) subtitle format.

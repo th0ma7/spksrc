@@ -10,7 +10,7 @@ HOMEPAGE = https://www.hhi.fraunhofer.de/en/departments/vca/technologies-and-sol
 COMMENT  = VVenC, the Fraunhofer Versatile Video Encoder, is a fast and efficient software H.266/VVC encoder implementation
 LICENSE  = BSD-3-Clause-Clear license
 
-MIN_GCC_VERSION = 7
+MIN_GCC_VERSION = 7.5
 REQUIRED_MIN_SRM = 1.3
 
 include ../../mk/spksrc.common.mk

@@ -6,7 +6,7 @@ PKG_DIST_SITE = https://github.com/libjxl/libjxl/archive/
 PKG_DIST_FILE = $(PKG_NAME)-$(PKG_VERS).$(PKG_EXT)
 PKG_DIR = $(PKG_NAME)-$(PKG_VERS)
 
-MIN_GCC_VERSION = 7
+MIN_GCC_VERSION = 7.5
 REQUIRED_MIN_SRM = 1.3
 
 DEPENDS = cross/libpng cross/brotli cross/lcms2 cross/openexr cross/highway cross/sjpeg-source

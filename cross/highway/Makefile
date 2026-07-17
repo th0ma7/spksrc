@@ -7,7 +7,7 @@ PKG_DIR = $(PKG_NAME)-$(PKG_VERS)
 
 DEPENDS =
 
-MIN_GCC_VERSION = 7
+MIN_GCC_VERSION = 7.5
 
 HOMEPAGE = https://google.github.io/highway/
 COMMENT  = Performance-portable, length-agnostic SIMD with runtime dispatch.

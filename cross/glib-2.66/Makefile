@@ -11,7 +11,7 @@ HOMEPAGE = https://developer.gnome.org/glib/
 COMMENT  = General-purpose utility library.
 LICENSE  = LGPLv2.1+
 
-UNSUPPORTED_ARCHS = $(OLD_PPC_ARCHS)
+MIN_GCC_VERSION = 4.4
 
 # https://docs.gtk.org/glib/building.html
 CONFIGURE_ARGS += -Dlibmount=disabled

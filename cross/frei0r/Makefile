@@ -12,7 +12,7 @@ HOMEPAGE = https://frei0r.dyne.org/
 COMMENT  = Frei0r is a minimalistic plugin API for video effects.
 LICENSE  = GPL-2.0
 
-MIN_GCC_VERSION = 7
+MIN_GCC_VERSION = 7.5
 REQUIRED_MIN_SRM = 1.3
 
 CMAKE_USE_TOOLCHAIN_FILE = OFF
