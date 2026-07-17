@@ -7,9 +7,7 @@ PKG_DIR = $(PKG_NAME)-$(PKG_VERS)
 
 DEPENDS =
 
-# Minimum GCC version required is 7
-REQUIRED_MIN_DSM = 7.0
-UNSUPPORTED_ARCHS = comcerto2k
+MIN_GCC_VERSION = 7
 
 HOMEPAGE = https://google.github.io/highway/
 COMMENT  = Performance-portable, length-agnostic SIMD with runtime dispatch.

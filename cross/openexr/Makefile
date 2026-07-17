@@ -11,9 +11,7 @@ PKG_DIR = $(PKG_NAME)-$(PKG_VERS)
 
 DEPENDS = cross/zlib
 
-# Toolchains lacking c++11 compiler ar not supported  
-UNSUPPORTED_ARCHS = $(ARMv5_ARCHS) $(OLD_PPC_ARCHS)
-UNSUPPORTED_ARCHS_TCVERSION = x86-5.2
+MIN_GCC_VERSION = 4.8
 
 HOMEPAGE = https://www.openexr.com/
 COMMENT  = OpenEXR provides the specification and reference implementation of the EXR file format, the professional-grade image storage format of the motion picture industry.
