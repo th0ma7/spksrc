@@ -75,11 +75,24 @@ CPPFLAGS += -I$(abspath $(INSTALL_DIR)/$(INSTALL_PREFIX)/include)
 CXXFLAGS += -I$(abspath $(TC_WORK_DIR)/$(TC_TARGET)/$(TC_INCLUDE)) $(TC_EXTRA_CFLAGS)
 CXXFLAGS += -I$(abspath $(INSTALL_DIR)/$(INSTALL_PREFIX)/include)
 
-ifneq ($(strip $(TC_HAS_FORTRAN)),)
-FFLAGS += -I$(abspath $(TC_WORK_DIR)/$(TC_TARGET)/$(TC_INCLUDE)) $(TC_EXTRA_FFLAGS)
-FFLAGS += -I$(abspath $(INSTALL_DIR)/$(INSTALL_PREFIX)/include)
-endif
+# $(if ...) rather than a parse-time ifneq: TC_HAS_FORTRAN is lazy (it looks for
+# the binary), and at parse time the toolchain may not be extracted yet.
+FFLAGS += $(if $(strip $(TC_HAS_FORTRAN)),-I$(abspath $(TC_WORK_DIR)/$(TC_TARGET)/$(TC_INCLUDE)) $(TC_EXTRA_FFLAGS))
+FFLAGS += $(if $(strip $(TC_HAS_FORTRAN)),-I$(abspath $(INSTALL_DIR)/$(INSTALL_PREFIX)/include))
 
+# The sysroot -L below also carries the toolchain's STOCK libstdc++, and ld
+# searches an explicit -L before the compiler's own directories. So with a gcc
+# overlay selected, ANY package linking C++ silently picks up the stock libstdc++
+# and dies on symbols the newer compiler emits -- std::__cxx11::basic_string (the
+# gcc 5 ABI), or operator delete(void*, size_t) (C++14 sized delete). It is not
+# the package's fault and no package can work around it: the framework hands every
+# build that -L. Put the overlay's own runtime directory ahead of it.
+#
+# Only when an overlay is actually selected (TC_GCC_SUFFIX non-empty): under
+# LEGACY_TOOLCHAIN the stock libstdc++ is the correct one. Lazy on purpose --
+# TC_GCC_SUFFIX is defined later, in tc_vars.mk.
+TC_OVERLAY_LIBDIR = $(if $(strip $(TC_GCC_SUFFIX)),$(dir $(firstword $(wildcard $(TC_WORK_DIR)/$(TC_TARGET)/lib/gcc/$(TC_TARGET)/*/libstdc++.a))))
+LDFLAGS += $(if $(TC_OVERLAY_LIBDIR),-L$(TC_OVERLAY_LIBDIR))
 LDFLAGS += -L$(abspath $(TC_WORK_DIR)/$(TC_TARGET)/$(TC_LIBRARY)) $(TC_EXTRA_CFLAGS)
 LDFLAGS += -L$(abspath $(INSTALL_DIR)/$(INSTALL_PREFIX)/lib)
 LDFLAGS += -Wl,--rpath-link,$(abspath $(INSTALL_DIR)/$(INSTALL_PREFIX)/lib)
