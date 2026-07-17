@@ -43,29 +43,99 @@ endif
 
 TC_LIBRARY_PATH = $(realpath $(TC_PATH)..)/$(TC_LIBRARY)
 
+# Libraries a package may have to carry because they come from the toolchain and
+# not from DSM. The two lists differ by WHY a copy is needed, which is what
+# decides when to take one:
+#
+#   TC_LIBS_ALWAYS   DSM ships no copy at all, so any binary that needs one must
+#                    carry it. Historical list, behaviour unchanged.
+#
+#   TC_LIBS_VERSION  DSM ships a copy -- so a copy is carried ONLY when a binary
+#                    asks for a symbol version that copy does not provide. This
+#                    could not happen while the compiler was always the
+#                    toolchain's own; a gcc overlay makes it routine: gcc 8.5
+#                    emits references to GLIBCXX_3.4.21 while the DSM 6.2.4
+#                    libstdc++ stops at 3.4.16, so the binary links here and then
+#                    fails to start on the NAS.
+TC_LIBS_ALWAYS  = libatomic.so libquadmath.so libgfortran.so
+TC_LIBS_VERSION = libstdc++.so libgcc_s.so
+
+# What the NAS itself provides: the sysroot mirrors the running system, so it is
+# the reference for "does DSM already satisfy this binary?".
+TC_SYSROOT_LIBDIR = $(TC_LIBRARY_PATH)
+
 .PHONY: strip strip_msg
 .PHONY: $(PRE_STRIP_TARGET) $(STRIP_TARGET) $(POST_STRIP_TARGET)
 
 strip_msg:
 	@$(MSG) "Stripping binaries and libraries of $(NAME)"
 
+# Which copy to carry is decided from the binary itself -- the symbol versions it
+# actually asks for -- and not from how the toolchain was configured. Asking the
+# artifact rather than the configuration is what makes this survive a dependency
+# chain that mixes compilers, and what keeps it correct for a future overlay
+# (gcc 12) without touching this file.
+#
+# It also replaces a plain find, which returned the stock library, the overlay's,
+# and the multilib one all at once -- three different versions handed to a
+# basename expecting one.
+define _tclib_helpers
+_provides_() { \
+   _lib_="$$1" ; shift ; \
+   for _v_ in $$@ ; do \
+      strings -a "$$_lib_" 2>/dev/null | grep -qx "$$_v_" || return 1 ; \
+   done ; \
+   return 0 ; \
+} ; \
+_versions_needed_() { \
+   readelf -V "$$1" 2>/dev/null | awk -v so="$$2" \
+     'index($$0, "File: " so) > 0 { want = 1 ; next } \
+      /File:/ { want = 0 } \
+      want && /Name:/ { for (i = 1; i <= NF; i++) if ($$i == "Name:") print $$(i+1) }' ; \
+} ; \
+_select_tclib_() { \
+   _tclib_="$$1" ; _bin_="$$2" ; _policy_="$$3" ; \
+   _soname_=$$(objdump -p "$$_bin_" 2>/dev/null | awk '/NEEDED/ { print $$2 }' | grep -F "$$_tclib_" | head -1) ; \
+   [ -n "$$_soname_" ] || return 1 ; \
+   _need_=$$(_versions_needed_ "$$_bin_" "$$_soname_") ; \
+   if [ "$$_policy_" = "version" ] ; then \
+      _nas_=$$(realpath -e $(TC_SYSROOT_LIBDIR)/$$_soname_ 2>/dev/null) ; \
+      if [ -n "$$_nas_" ] && _provides_ "$$_nas_" $$_need_ ; then \
+         echo "===>      $$_soname_: DSM copy already provides what $$(basename $$_bin_) asks for" >&2 ; \
+         return 1 ; \
+      fi ; \
+   fi ; \
+   for _cand_ in $$(find $(TC_LIBRARY_PATH)/../. -name "$$_tclib_" 2>/dev/null | xargs -r realpath 2>/dev/null | sort -u) ; do \
+      if _provides_ "$$_cand_" $$_need_ ; then echo "$$_cand_" ; return 0 ; fi ; \
+   done ; \
+   echo "===>      WARNING: no $$_tclib_ in the toolchain provides [$$(echo $$_need_ | tr '\n' ' ')] for $$_bin_" >&2 ; \
+   return 1 ; \
+} ; \
+_install_tclib_() { \
+   _tclib_="$$1" ; _src_="$$2" ; \
+   echo "===>      Add library from toolchain ($$(basename $$_src_))" ; \
+   install -d -m 755 $(STAGING_DIR)/lib ; \
+   install -m 644 "$$_src_" $(STAGING_DIR)/lib/ ; \
+   symlinks=$$(find $(TC_LIBRARY_PATH)/. -type l -name "$$_tclib_*" -printf '%f ' | xargs) ; \
+   echo "===>      Add symlink from toolchain ($$symlinks)" ; \
+   for _link_ in $$symlinks ; do \
+      (cd $(STAGING_DIR)/lib/ && ln -sf $$(basename $$_src_) $$_link_) ; \
+   done ; \
+}
+endef
+
 include_toolchain_specific_libraries:
-	@for tclib in libatomic\.so libquadmath\.so libgfortran\.so; do \
-	echo  "===> SEARCHING for $${tclib}" ; \
+	@$(_tclib_helpers) ; \
+	for tclib in $(TC_LIBS_ALWAYS) $(TC_LIBS_VERSION); do \
+	case " $(TC_LIBS_VERSION) " in *" $${tclib} "*) _policy_=version ;; *) _policy_=always ;; esac ; \
+	echo  "===> SEARCHING for $${tclib} ($${_policy_})" ; \
 	cat $(INSTALL_PLIST) | sed 's/:/ /' | while read type file ; do \
 	  case $${type} in \
 	    lib|bin) \
-	         if [ "$$(objdump -p $(STAGING_DIR)/$${file} 2>/dev/null | grep NEEDED | grep $${tclib})" ]; then \
+	         _src_=$$(_select_tclib_ "$${tclib}" "$(STAGING_DIR)/$${file}" "$${_policy_}") ; \
+	         if [ -n "$${_src_}" ]; then \
 	            echo  "===>  Found in $${file} for library dependency from toolchain ($${tclib})" ; \
-	            _tclib_=$$(realpath $$(find $(TC_LIBRARY_PATH)/../. -name $${tclib})) ; \
-	            echo  "===>      Add library from toolchain ($$(basename $${_tclib_}))" ; \
-	            install -d -m 755 $(STAGING_DIR)/lib ; \
-	            install -m 644 $${_tclib_} $(STAGING_DIR)/lib/ ; \
-	            symlinks=$$(find $(TC_LIBRARY_PATH)/. -type l -name "$${tclib}*" -printf '%f ' | xargs) ; \
-	            echo  "===>      Add symlink from toolchain ($${symlinks})" ; \
-	            for _link_ in $${symlinks} ; do \
-	               (cd $(STAGING_DIR)/lib/ && ln -sf $$(basename $${_tclib_}) $${_link_}) ; \
-	            done ; \
+	            _install_tclib_ "$${tclib}" "$${_src_}" ; \
 	            break 2 ; \
 	         fi ;; \
 	  esac ; \
@@ -74,17 +144,10 @@ include_toolchain_specific_libraries:
 	   for shlib in $$(zipinfo -1 $${wheel} *.so 2>/dev/null) ; do \
 	      _tmp_=$$(mktemp -d -p $(WORK_DIR)/wheelhouse) ; \
 	      unzip -qq -d $${_tmp_} $${wheel} $${shlib} ; \
-	      if [ "$$(objdump -p $${_tmp_}/$${shlib} 2>/dev/null | grep NEEDED | grep $${tclib})" ]; then \
+	      _src_=$$(_select_tclib_ "$${tclib}" "$${_tmp_}/$${shlib}" "$${_policy_}") ; \
+	      if [ -n "$${_src_}" ]; then \
 	         echo  "===>  Found in $$(basename $${wheel}) for library dependency from toolchain ($${tclib})" ; \
-	         _tclib_=$$(realpath $$(find $(TC_LIBRARY_PATH)/../. -name $${tclib})) ; \
-	         echo  "===>      Add library from toolchain ($$(basename $${_tclib_}))" ; \
-	         install -d -m 755 $(STAGING_DIR)/lib ; \
-	         install -m 644 $${_tclib_} $(STAGING_DIR)/lib/ ; \
-	         symlinks=$$(find $(TC_LIBRARY_PATH)/. -type l -name "$${tclib}*" -printf '%f ' | xargs) ; \
-	         echo  "===>      Add symlink from toolchain ($${symlinks})" ; \
-	         for _link_ in $${symlinks} ; do \
-	            (cd $(STAGING_DIR)/lib/ && ln -sf $$(basename $${_tclib_}) $${_link_}) ; \
-	         done ; \
+	         _install_tclib_ "$${tclib}" "$${_src_}" ; \
 	         rm -fr $${_tmp_} ; \
 	         break 2 ; \
 	      fi ; \
