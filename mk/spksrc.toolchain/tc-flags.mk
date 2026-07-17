@@ -63,6 +63,36 @@ TC_HAS_FORTRAN = $(if $(wildcard $(TC_WORK_DIR)/$(TC_TARGET)/bin/$(TC_PREFIX)gfo
 # $(if ...) rather than a parse-time ifneq, to keep TC_HAS_FORTRAN lazy.
 TOOLS = ld ldshared:"gcc -shared" cpp nm cc:gcc as ranlib cxx:g++ ar strip objdump objcopy readelf$(if $(strip $(TC_HAS_FORTRAN)), fc:gfortran)
 
+# Does the SELECTED compiler ship libatomic? Ask it, rather than tabulate.
+#
+# A target without native 64-bit atomics (ARMv5, PowerPC e500v2) makes gcc emit
+# calls into libatomic, which the link then has to resolve. But the library only
+# ships from gcc 4.7 on, and handing -latomic to an older gcc is fatal -- "cannot
+# find -latomic" -- so a toolchain cannot just declare the flag and be done:
+# whether it applies depends on which compiler LEGACY_TOOLCHAIN selected, not on
+# the target alone.
+#
+# Availability is the exact criterion here, not a lucky proxy: a gcc old enough
+# to lack libatomic also predates the __atomic_* builtins, emits __sync_*
+# instead, and therefore never needs the library. One question answers both, and
+# it answers for whichever compiler was actually picked. Lazy on purpose --
+# TC_GCC_SUFFIX comes from tc_vars.mk, later.
+TC_HAS_LIBATOMIC = $(if $(filter /%,$(shell $(TC_WORK_DIR)/$(TC_TARGET)/bin/$(TC_PREFIX)gcc$(TC_GCC_SUFFIX) -print-file-name=libatomic.so 2>/dev/null)),1)
+
+# Link flags a TOOLCHAIN declares for itself, beside TC_EXTRA_CFLAGS: what the
+# target needs from the linker, stated once, where it is known.
+#
+# Packages carry this knowledge today, as arch lists -- cups and ffmpeg4
+# enumerate ARMv5_ARCHS/OLD_PPC_ARCHS to add -lrt (those are exactly the
+# toolchains whose glibc predates 2.17, when clock_gettime moved into libc),
+# ffmpeg8 names qoriq to add -latomic, and flac gives up and adds -lrt
+# everywhere. That is the same "name where it breaks instead of why" that
+# MIN_GCC_VERSION replaces on the capability side.
+#
+# -latomic is dropped when the selected compiler does not ship it, so a toolchain
+# can declare it once and legacy builds keep linking exactly as before.
+TC_EXTRA_LDFLAGS_SELECTED = $(if $(TC_HAS_LIBATOMIC),$(TC_EXTRA_LDFLAGS),$(filter-out -latomic,$(TC_EXTRA_LDFLAGS)))
+
 ####
 # Define regular build flags
 
@@ -94,6 +124,7 @@ FFLAGS += $(if $(strip $(TC_HAS_FORTRAN)),-I$(abspath $(INSTALL_DIR)/$(INSTALL_P
 TC_OVERLAY_LIBDIR = $(if $(strip $(TC_GCC_SUFFIX)),$(dir $(firstword $(wildcard $(TC_WORK_DIR)/$(TC_TARGET)/lib/gcc/$(TC_TARGET)/*/libstdc++.a))))
 LDFLAGS += $(if $(TC_OVERLAY_LIBDIR),-L$(TC_OVERLAY_LIBDIR))
 LDFLAGS += -L$(abspath $(TC_WORK_DIR)/$(TC_TARGET)/$(TC_LIBRARY)) $(TC_EXTRA_CFLAGS)
+LDFLAGS += $(TC_EXTRA_LDFLAGS_SELECTED)
 LDFLAGS += -L$(abspath $(INSTALL_DIR)/$(INSTALL_PREFIX)/lib)
 LDFLAGS += -Wl,--rpath-link,$(abspath $(INSTALL_DIR)/$(INSTALL_PREFIX)/lib)
 LDFLAGS += -Wl,--rpath,$(abspath $(INSTALL_PREFIX)/lib)
