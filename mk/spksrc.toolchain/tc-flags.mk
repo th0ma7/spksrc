@@ -39,21 +39,29 @@ ifeq ($(strip $(TC_LIBRARY)),)
 TC_LIBRARY = $(TC_SYSROOT)/lib
 endif
 
-# we can't check whether gfortran exists, because toolchain is not yet extracted
-ifeq ($(strip $(firstword $(subst ., ,$(TC_VERS)))),7)
-TC_HAS_FORTRAN = 1
-else ifeq ($(strip $(TC_VERS)),1.3)
-TC_HAS_FORTRAN = 1
-else ifeq ($(strip $(TC_VERS)),6.2.4)
-ifeq ($(findstring $(ARCH),$(x64_ARCHS)),$(ARCH))
-TC_HAS_FORTRAN = 1
-endif
-endif
+# Does this toolchain provide gfortran? Look, rather than tabulate.
+#
+# This was a DSM/arch table, justified by "we can't check whether gfortran exists,
+# because toolchain is not yet extracted". True at parse time -- but TOOLS is only
+# ever expanded inside the tc_vars recipes, and by then extraction has happened
+# (tcvars runs after rustc, which depends on patch -> extract). Deferring the
+# check with a lazy '=' is all it takes.
+#
+# Two reasons the table had to go. A gcc overlay (native/gcc8) is built with
+# fortran enabled, so it brings gfortran to toolchains no table would list: armv5
+# now has arm-marvell-linux-gnueabi-gfortran-8.5, while the table said its
+# DSM/arch pair has none. And the table answered differently depending on the
+# caller -- its 6.2.4 branch tested $(findstring $(ARCH),$(x64_ARCHS)) against
+# $(ARCH), which an unset ARCH satisfies vacuously, so every 6.2.4 toolchain
+# claimed fortran from the toolchain context and only x64 did from a package.
+# Looks for the exact binary this build will use, suffix included: a bare
+# gfortran* glob would match the overlay's gfortran-8.5 and answer yes under
+# LEGACY_TOOLCHAIN, where the stock armv5 toolchain has no gfortran at all.
+# TC_GCC_SUFFIX is defined later (tc_vars.mk); lazy expansion makes that fine.
+TC_HAS_FORTRAN = $(if $(wildcard $(TC_WORK_DIR)/$(TC_TARGET)/bin/$(TC_PREFIX)gfortran$(TC_GCC_SUFFIX)),1)
 
-TOOLS = ld ldshared:"gcc -shared" cpp nm cc:gcc as ranlib cxx:g++ ar strip objdump objcopy readelf
-ifneq ($(strip $(TC_HAS_FORTRAN)),)
-TOOLS += fc:gfortran
-endif
+# $(if ...) rather than a parse-time ifneq, to keep TC_HAS_FORTRAN lazy.
+TOOLS = ld ldshared:"gcc -shared" cpp nm cc:gcc as ranlib cxx:g++ ar strip objdump objcopy readelf$(if $(strip $(TC_HAS_FORTRAN)), fc:gfortran)
 
 ####
 # Define regular build flags
