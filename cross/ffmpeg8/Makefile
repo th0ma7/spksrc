@@ -19,6 +19,13 @@ MIN_GCC_VERSION = 4.9
 include ../../mk/spksrc.common.mk
 
 CONFIGURE_ARGS  = --target-os=linux --cross-prefix=$(TC_PATH)$(TC_PREFIX) --prefix=$(INSTALL_PREFIX)
+# ffmpeg builds the compiler name from --cross-prefix as <prefix>gcc, ignoring the
+# environment CC. With a gcc overlay the real compiler is <prefix>gcc-8.5
+# (TC_GCC_SUFFIX), so cross-prefix alone picks the stock 4.6.4 and configure dies
+# on "Compiler lacks C11 support". Point --cc/--cxx at the selected compiler; the
+# suffix is empty in legacy mode, giving exactly the stock name as before.
+CONFIGURE_ARGS += --cc=$(TC_PATH)$(TC_PREFIX)gcc$(TC_GCC_SUFFIX)
+CONFIGURE_ARGS += --cxx=$(TC_PATH)$(TC_PREFIX)g++$(TC_GCC_SUFFIX)
 CONFIGURE_ARGS += --pkg-config=/usr/bin/pkg-config
 CONFIGURE_ARGS += --ranlib=$(RANLIB)
 CONFIGURE_ARGS += --enable-cross-compile --enable-rpath --enable-pic
@@ -233,7 +240,31 @@ DEPENDS += cross/svt-av1
 CONFIGURE_ARGS += --enable-libsvtav1
 endif
 
-ifeq ($(findstring $(ARCH),$(ARMv7_ARCHS)),$(ARCH))
+# ARMv5 has no NEON and no thumb2; ported from ffmpeg4, which still declares it.
+# ffmpeg's configure fails outright without an --arch when cross-compiling. -lrt
+# (clock_gettime, pre-glibc-2.17) comes from the toolchain's TC_EXTRA_LDFLAGS now,
+# not a per-package --extra-ldflags as ffmpeg4 still does.
+# The V4L2 multiplanar API (V4L2_CAP_VIDEO_CAPTURE_MPLANE, VIDEO_MAX_PLANES,
+# v4l2_buffer.m.planes) arrived in Linux 3.1, and ffmpeg's v4l2 device uses it
+# unconditionally. Toolchains that ship older kernel headers (armv5 and the old PPC
+# on 2.6.32) cannot compile it. Keyed on the kernel the toolchain provides rather
+# than on an arch list, so it holds for every such toolchain and needs no upkeep --
+# this replaces the per-arch --disable-indev=v4l2 that armv5 and qoriq carried.
+ifeq ($(call version_lt,$(TC_STOCK_KERNEL),3.1),1)
+CONFIGURE_ARGS += --disable-indev=v4l2 --disable-outdev=v4l2
+endif
+
+ifeq ($(findstring $(ARCH),$(ARMv5_ARCHS)),$(ARCH))
+CONFIGURE_ARGS += --arch=arm
+CONFIGURE_ARGS += --disable-neon
+# glibc 2.15's <assert.h> predates the C11 static_assert macro (added in 2.16), so
+# even gcc 8.5 -- which has the _Static_assert keyword -- fails ffmpeg's C11 check.
+# Map the macro to the keyword the compiler does have. A header gap, not a compiler
+# one; the overlay compiler hits it just the same.
+CONFIGURE_ARGS += --extra-cflags=-Dstatic_assert=_Static_assert
+endif
+
+ifeq ($(findstring $(ARCH),$(ARMv7_ARCHS) $(ARMv7L_ARCHS)),$(ARCH))
 CONFIGURE_ARGS += --arch=arm
 CONFIGURE_ARGS += --enable-neon
 CONFIGURE_ARGS += --enable-thumb
@@ -258,8 +289,6 @@ ifeq ($(findstring $(ARCH),qoriq),$(ARCH))
 CONFIGURE_ARGS += --arch=ppc
 CONFIGURE_ARGS += --cpu=e500v2
 CONFIGURE_ARGS += --extra-libs=-latomic
-# ffmpeg-7.1 video4linux2 is no longer compatible
-CONFIGURE_ARGS += --disable-indev=v4l2
 endif
 
 ifeq ($(findstring $(ARCH),evansport),$(ARCH))
