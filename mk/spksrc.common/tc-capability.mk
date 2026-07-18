@@ -116,6 +116,14 @@ LEGACY_TOOLCHAIN ?= 1
 # after the fact -- that one depends on how the toolchain happened to be built.
 TC_GCC_EFFECTIVE := $(if $(filter 1 on ON,$(strip $(LEGACY_TOOLCHAIN))),$(TC_STOCK_GCC),$(or $(strip $(TC_GCC_VERSION)),$(TC_OVERLAY_GCC),$(TC_STOCK_GCC)))
 
+# Whether TC_GCC_EFFECTIVE comes from a gcc overlay rather than the toolchain's
+# stock gcc -- the mode (overlay|legacy), known statically here. TC_GCC_SUFFIX in
+# tc_vars only exists once the work dir's tc_vars.mk has been generated, so anything
+# that runs during the dependency walk (the build status line) cannot read it and
+# must use this instead. Overlay is active when the build is not forced legacy and
+# an overlay gcc is actually available to select.
+TC_GCC_IS_OVERLAY := $(if $(filter 1 on ON,$(strip $(LEGACY_TOOLCHAIN))),,$(if $(or $(strip $(TC_GCC_VERSION)),$(strip $(TC_OVERLAY_GCC))),1))
+
 # Step 2: judge the compiler that was actually picked, not the one that could
 # have been. Checking "could an overlay satisfy this?" would wave through a build
 # that then compiles with the stock gcc anyway -- forced there by an explicit

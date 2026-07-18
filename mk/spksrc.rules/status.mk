@@ -41,15 +41,18 @@ pre_status_target:
 # dependency chain then shows, line by line, which compiler each one got -- and
 # since the whole chain is pinned to one, an odd line out is a bug worth seeing.
 #
-# TC_GCC is what the compiler reported for itself (-dumpversion) in the generated
-# tc_vars.mk, so it is right for either mode; TC_GCC_SUFFIX is non-empty precisely
-# when an overlay was selected, which makes it the mode. The field disappears where
-# no cross compiler is involved (native, toolchain), rather than printing a blank.
+# TC_GCC_EFFECTIVE (the version) and TC_GCC_IS_OVERLAY (the mode) both come from
+# tc-capability.mk and are known statically, before anything is built. That matters
+# here: the status line is printed while WALKING the dependency tree, before each
+# package's tc_vars.mk exists -- so TC_GCC / TC_GCC_SUFFIX read back stale or empty
+# (an overlay build logging "4.3.2 (legacy)", or no field at all), while the static
+# pair is always right. The field disappears where no cross compiler is involved
+# (native, toolchain) -- TC_GCC_EFFECTIVE is empty there -- rather than blank.
 #
 # _status_comma: a literal comma cannot be written inside $(if ...) -- make reads it
 # as an argument separator.
 _status_comma := ,
-STATUS_GCC = $(shell printf '%-23s' "$(if $(strip $(TC_GCC)),GCC: $(strip $(TC_GCC)) ($(if $(strip $(TC_GCC_SUFFIX)),overlay,legacy))$(_status_comma))")
+STATUS_GCC = $(shell printf '%-23s' "$(if $(strip $(TC_GCC_EFFECTIVE)),GCC: $(strip $(TC_GCC_EFFECTIVE)) ($(if $(strip $(TC_GCC_IS_OVERLAY)),overlay,legacy))$(_status_comma))")
 
 # The arch label is STATUS_ARCH (logs.mk), which also names the log file -- logs.mk
 # says the two "can never disagree", and they did: every branch below re-derived the
