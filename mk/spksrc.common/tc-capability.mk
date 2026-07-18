@@ -69,6 +69,13 @@ TC_STOCK_GCC := $(shell sed -n 's/^TC_DIST *= *//p' $(_TC_CAP_MK) 2>/dev/null | 
                          else if (n>=4) { printf "%s.%s.%s", substr($$0,1,1), substr($$0,2,1), substr($$0,3,1) } }')
 TC_STOCK_GLIBC := $(shell sed -n 's/^TC_GLIBC *= *//p' $(_TC_CAP_MK) 2>/dev/null)
 
+# The Linux kernel headers the toolchain ships (its sysroot). Read here, statically
+# from the toolchain Makefile, for the same reason as glibc: a package gating on it
+# (ffmpeg's V4L2 multiplanar API needs 3.1) must get a reliable answer, not the empty
+# string a not-yet-generated tc_vars.mk would give -- which version_lt reads as
+# "older than everything".
+TC_STOCK_KERNEL := $(shell sed -n 's/^TC_KERNEL *= *//p' $(_TC_CAP_MK) 2>/dev/null)
+
 # An overlay package existing is the declaration that this gcc is available here.
 TC_OVERLAY_GCC := $(if $(wildcard $(BASEDIR)/toolchain/syno-$(ARCH)-$(TCVERSION)-gcc8),8.5)
 
