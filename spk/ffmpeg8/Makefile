@@ -8,8 +8,8 @@ CHANGELOG = "1. Update to version 8.1.2"
 DEPENDS = cross/ffmpeg8
 VIDEODRV_PACKAGE = synocli-videodriver
 
-# requires c11 and proper atomic using gcc-4.9+ support
-UNSUPPORTED_ARCHS = $(ARMv5_ARCHS) $(ARMv7L_ARCHS) $(OLD_PPC_ARCHS)
+# Migrate to using overlay gcc-8 when available
+LEGACY_TOOLCHAIN ?= 0
 
 MAINTAINER = th0ma7
 DESCRIPTION = FFmpeg is a complete, cross-platform solution to record, convert and stream audio and video. It includes libavcodec - the leading audio/video codec library.  More information from SynoCommunity FFmpeg package available at https://docs.synocommunity.com/packages/ffmpeg/
