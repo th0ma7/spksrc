@@ -15,7 +15,9 @@ LICENSE  = SPDX short identifier: BSD-2-Clause-Patent
 ADDITIONAL_LDFLAGS =  -lm
 POST_INSTALL_TARGET = svt-av1_post_install_target
 
-UNSUPPORTED_ARCHS = $(ARMv5_ARCHS) $(PPC_ARCHS)
+# SVT-AV1 is 64-bit only (its configure refuses 32-bit); declare the requirement
+# rather than list the 32-bit archs (ARMv5, ARMv7, ARMv7L, i686, PPC).
+REQUIRE_64BIT = 1
 
 include ../../mk/spksrc.cross-cmake.mk
 

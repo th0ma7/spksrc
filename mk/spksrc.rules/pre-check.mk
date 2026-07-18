@@ -64,6 +64,20 @@ ifneq ($(UNSUPPORTED_ARCHS),)
   endif
 endif
 
+# Refuse a 32-bit arch for a package that requires 64-bit (REQUIRE_64BIT = 1).
+# A capability-style declaration -- the package states it needs a 64-bit target
+# rather than enumerating the 32-bit archs it cannot run on. SVT-AV1, for one,
+# rejects 32-bit at configure ("32-bit is not supported"); this catches it up front
+# with a clear reason instead of a build-time failure.
+ifeq ($(strip $(REQUIRE_64BIT)),1)
+  ifeq (,$(findstring $(ARCH),$(64bit_ARCHS)))
+    ifneq (,$(BUILD_UNSUPPORTED_FILE))
+      $(shell echo $(date --date=now +"%Y.%m.%d %H:%M:%S") - $(SPK_FOLDER): Arch '$(ARCH)' requires a 64-bit architecture >> $(BUILD_UNSUPPORTED_FILE))
+    endif
+    @$(error Arch '$(ARCH)' is not supported by $(SPK_NAME)$(PKG_NAME): requires a 64-bit architecture)
+  endif
+endif
+
 ifneq ($(TCVERSION),)
 
 ifneq ($(UNSUPPORTED_ARCHS_TCVERSION),)
