@@ -16,6 +16,12 @@ UNSUPPORTED_ARCHS = $(ARMv5_ARCHS) $(ARMv7L_ARCHS) $(OLD_PPC_ARCHS)
 include ../../mk/spksrc.common.mk
 
 CONFIGURE_ARGS  = --target-os=linux --cross-prefix=$(TC_PATH)$(TC_PREFIX) --prefix=$(INSTALL_PREFIX)
+# ffmpeg builds the compiler name from --cross-prefix as <prefix>gcc and ignores the
+# environment CC, so a gcc overlay (<prefix>gcc-8.5, via TC_GCC_SUFFIX) is bypassed
+# and configure picks the stock gcc. Point --cc/--cxx at the selected compiler; the
+# suffix is empty in legacy mode, giving exactly the stock name as before.
+CONFIGURE_ARGS += --cc=$(TC_PATH)$(TC_PREFIX)gcc$(TC_GCC_SUFFIX)
+CONFIGURE_ARGS += --cxx=$(TC_PATH)$(TC_PREFIX)g++$(TC_GCC_SUFFIX)
 CONFIGURE_ARGS += --pkg-config=/usr/bin/pkg-config
 CONFIGURE_ARGS += --ranlib=$(RANLIB)
 CONFIGURE_ARGS += --enable-cross-compile --enable-rpath --enable-pic
@@ -238,6 +244,14 @@ CONFIGURE_ARGS += --enable-neon
 CONFIGURE_ARGS += --enable-libdrm
 CONFIGURE_ARGS += --enable-thumb
 CONFIGURE_ARGS += --enable-v4l2-m2m
+endif
+
+# V4L2 multiplanar API (V4L2_CAP_VIDEO_CAPTURE_MPLANE, VIDEO_MAX_PLANES) arrived in
+# Linux 3.1, and ffmpeg's v4l2 device uses it unconditionally. Toolchains that ship
+# older kernel headers (armv5 and old PPC on 2.6.32) cannot compile it. Keyed on the
+# kernel the toolchain provides rather than an arch list.
+ifeq ($(call version_lt,$(TC_STOCK_KERNEL),3.1),1)
+CONFIGURE_ARGS += --disable-indev=v4l2 --disable-outdev=v4l2
 endif
 
 ifeq ($(findstring $(ARCH),qoriq),$(ARCH))
