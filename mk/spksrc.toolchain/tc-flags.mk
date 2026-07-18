@@ -123,6 +123,19 @@ FFLAGS += $(if $(strip $(TC_HAS_FORTRAN)),-I$(abspath $(INSTALL_DIR)/$(INSTALL_P
 # TC_GCC_SUFFIX is defined later, in tc_vars.mk.
 TC_OVERLAY_LIBDIR = $(if $(strip $(TC_GCC_SUFFIX)),$(dir $(firstword $(wildcard $(TC_WORK_DIR)/$(TC_TARGET)/lib/gcc/$(TC_TARGET)/*/libstdc++.a))))
 LDFLAGS += $(if $(TC_OVERLAY_LIBDIR),-L$(TC_OVERLAY_LIBDIR))
+# The -L above resolves libstdc++ for a DIRECT link. But when a shared library the
+# build links against (libchromaprint.so) has its own NEEDED libstdc++.so.6, ld
+# resolves that transitively through --rpath-link, not -L. The overlay's libstdc++
+# lives outside every default rpath-link path, so a C program linking a C++ shared
+# library -- exactly ffmpeg's chromaprint probe -- fails on the string/CXXABI
+# symbols the .so pulls from libstdc++. Put the overlay dir on rpath-link too.
+#
+# patsubst rather than $(if ...): the flag itself contains commas
+# (-Wl,--rpath-link,DIR) and $(if) reads those as its own argument separators,
+# which silently truncated this to a bare "-Wl". patsubst yields nothing when
+# TC_OVERLAY_LIBDIR is empty and the full flag when it is set.
+_tc_comma := ,
+LDFLAGS += $(patsubst %,-Wl$(_tc_comma)--rpath-link$(_tc_comma)%,$(TC_OVERLAY_LIBDIR))
 LDFLAGS += -L$(abspath $(TC_WORK_DIR)/$(TC_TARGET)/$(TC_LIBRARY)) $(TC_EXTRA_CFLAGS)
 LDFLAGS += $(TC_EXTRA_LDFLAGS_SELECTED)
 LDFLAGS += -L$(abspath $(INSTALL_DIR)/$(INSTALL_PREFIX)/lib)
