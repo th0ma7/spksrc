@@ -43,6 +43,12 @@ endif
 
 TC_LIBRARY_PATH = $(realpath $(TC_PATH)..)/$(TC_LIBRARY)
 
+# The toolchain's <target> root, holding both the sysroot (TC_LIBRARY_PATH) and the
+# compiler's own runtime dirs (lib/gcc/<target>/<version>). Runtime libraries live in
+# the latter -- libatomic and, with a gcc overlay, libstdc++/libgcc_s -- so the search
+# for a library to carry has to start here, not at the sysroot lib alone.
+TC_TOOLCHAIN_ROOT = $(realpath $(TC_PATH)..)
+
 # Libraries a package may have to carry because they come from the toolchain and
 # not from DSM. The two lists differ by WHY a copy is needed, which is what
 # decides when to take one:
@@ -105,7 +111,7 @@ _select_tclib_() { \
          return 1 ; \
       fi ; \
    fi ; \
-   for _cand_ in $$(find $(TC_LIBRARY_PATH)/../. -name "$$_tclib_" 2>/dev/null | xargs -r realpath 2>/dev/null | sort -u) ; do \
+   for _cand_ in $$(find $(TC_TOOLCHAIN_ROOT) -name "$$_tclib_" 2>/dev/null | xargs -r realpath 2>/dev/null | sort -u) ; do \
       if _provides_ "$$_cand_" $$_need_ ; then echo "$$_cand_" ; return 0 ; fi ; \
    done ; \
    echo "===>      WARNING: no $$_tclib_ in the toolchain provides [$$(echo $$_need_ | tr '\n' ' ')] for $$_bin_" >&2 ; \
@@ -116,7 +122,7 @@ _install_tclib_() { \
    echo "===>      Add library from toolchain ($$(basename $$_src_))" ; \
    install -d -m 755 $(STAGING_DIR)/lib ; \
    install -m 644 "$$_src_" $(STAGING_DIR)/lib/ ; \
-   symlinks=$$(find $(TC_LIBRARY_PATH)/. -type l -name "$$_tclib_*" -printf '%f ' | xargs) ; \
+   symlinks=$$(find $$(dirname "$$_src_")/. -maxdepth 1 -type l -name "$$_tclib_*" -printf '%f ' | xargs) ; \
    echo "===>      Add symlink from toolchain ($$symlinks)" ; \
    for _link_ in $$symlinks ; do \
       (cd $(STAGING_DIR)/lib/ && ln -sf $$(basename $$_src_) $$_link_) ; \
@@ -132,7 +138,7 @@ include_toolchain_specific_libraries:
 	cat $(INSTALL_PLIST) | sed 's/:/ /' | while read type file ; do \
 	  case $${type} in \
 	    lib|bin) \
-	         _src_=$$(_select_tclib_ "$${tclib}" "$(STAGING_DIR)/$${file}" "$${_policy_}") ; \
+	         _src_=$$(_select_tclib_ "$${tclib}" "$(STAGING_DIR)/$${file}" "$${_policy_}" || true) ; \
 	         if [ -n "$${_src_}" ]; then \
 	            echo  "===>  Found in $${file} for library dependency from toolchain ($${tclib})" ; \
 	            _install_tclib_ "$${tclib}" "$${_src_}" ; \
@@ -141,10 +147,11 @@ include_toolchain_specific_libraries:
 	  esac ; \
 	done ; \
 	for wheel in $(WORK_DIR)/wheelhouse/*.whl ; do \
+	   [ -e "$${wheel}" ] || continue ; \
 	   for shlib in $$(zipinfo -1 $${wheel} *.so 2>/dev/null) ; do \
 	      _tmp_=$$(mktemp -d -p $(WORK_DIR)/wheelhouse) ; \
 	      unzip -qq -d $${_tmp_} $${wheel} $${shlib} ; \
-	      _src_=$$(_select_tclib_ "$${tclib}" "$${_tmp_}/$${shlib}" "$${_policy_}") ; \
+	      _src_=$$(_select_tclib_ "$${tclib}" "$${_tmp_}/$${shlib}" "$${_policy_}" || true) ; \
 	      if [ -n "$${_src_}" ]; then \
 	         echo  "===>  Found in $$(basename $${wheel}) for library dependency from toolchain ($${tclib})" ; \
 	         _install_tclib_ "$${tclib}" "$${_src_}" ; \
