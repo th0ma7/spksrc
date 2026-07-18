@@ -12,9 +12,10 @@ include ../../mk/spksrc.common.mk
 # breaks that: ARMv5 now has gcc 8.5, so the gate would route it to a libvpx that
 # has no target for it (configure guesses the x86_64 host and passes -m64 to the ARM
 # compiler). Compiler version and ISA support are separate questions; the overlay
-# just made the proxy between them wrong. ARMv5 takes 1.14, which still has its
-# --target=generic-gnu case, regardless of how new the compiler is.
-ifeq ($(findstring $(ARCH),$(ARMv5_ARCHS)),$(ARCH))
+# just made the proxy between them wrong. ARMv5 and PowerPC take 1.14, which still
+# has a --target=generic-gnu case for both -- libvpx-latest offers only armv7/armv8/
+# x86 targets -- regardless of how new the compiler is.
+ifeq ($(findstring $(ARCH),$(ARMv5_ARCHS) $(PPC_ARCHS)),$(ARCH))
 DEPENDS = cross/libvpx-1.14
 else ifeq ($(call version_ge, $(TC_GCC_EFFECTIVE), 7.5),1)
 DEPENDS = cross/libvpx-latest
