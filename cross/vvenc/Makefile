@@ -33,4 +33,12 @@ ifeq ($(findstring $(ARCH),$(ARMv5_ARCHS) $(ARMv7_ARCHS) $(ARMv7L_ARCHS)),$(ARCH
 CONFIGURE_ARGS += -DVVENC_ENABLE_ARM_SIMD=FALSE
 endif
 
+# vvenc's detect_target_architecture knows ARM/AARCH64/X86/LOONGARCH but not PowerPC,
+# so on PPC it leaves VVENC_ENABLE_X86_SIMD at its default TRUE and tries to compile
+# x86/sse41 and x86/avx2 -- which crashes the PPC gcc with an ICE. No PPC SIMD path
+# exists, so build scalar.
+ifeq ($(findstring $(ARCH),$(PPC_ARCHS)),$(ARCH))
+CONFIGURE_ARGS += -DVVENC_ENABLE_X86_SIMD=FALSE
+endif
+
 include ../../mk/spksrc.cross-cmake.mk
