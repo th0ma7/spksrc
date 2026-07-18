@@ -16,7 +16,7 @@ include ../../mk/spksrc.common.mk
 # --target=generic-gnu case, regardless of how new the compiler is.
 ifeq ($(findstring $(ARCH),$(ARMv5_ARCHS)),$(ARCH))
 DEPENDS = cross/libvpx-1.14
-else ifeq ($(call version_ge, $(TC_GCC), 5),1)
+else ifeq ($(call version_ge, $(TC_GCC_EFFECTIVE), 7.5),1)
 DEPENDS = cross/libvpx-latest
 else
 DEPENDS = cross/libvpx-1.14
