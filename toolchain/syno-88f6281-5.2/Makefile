@@ -10,5 +10,9 @@ TC_DIST_SITE_PATH = toolchains%2Fdsm5.2
 TC_TARGET = arm-marvell-linux-gnueabi
 TC_SYSROOT = $(TC_TARGET)/libc
 TC_LIBRARY = $(TC_SYSROOT)/usr/lib
+# ARMv5 has no native atomics and glibc 2.15 keeps clock_gettime in librt --
+# same as the DSM 6.2.4 88f6281 toolchain. -latomic is dropped automatically by
+# tc-flags.mk when a selected compiler does not ship it.
+TC_EXTRA_LDFLAGS = -lrt -latomic
 
 include ../../mk/spksrc.toolchain.mk
