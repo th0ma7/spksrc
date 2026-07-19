@@ -13,6 +13,13 @@ HOMEPAGE = https://www.videolan.org/developers/x264.html
 COMMENT  = x264 is a free software library and application for encoding video streams into the H.264/MPEG-4 AVC forma
 LICENSE  = GPLv2
 
+# The current x264 git snapshot fails to configure under gcc 4.3.7 (its endian
+# probe trips -Werror=attributes / a missing warning option); it builds under
+# gcc 4.6 and up, on ARM and PowerPC alike, so this is a gcc-version floor, not an
+# arch limit. The capability check refuses ppc853x's 4.3.7 stock gcc unless the
+# overlay is used.
+MIN_GCC_VERSION = 4.6
+
 GNU_CONFIGURE = 1
 
 CONFIGURE_ARGS  = --enable-shared

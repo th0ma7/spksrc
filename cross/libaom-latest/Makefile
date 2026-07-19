@@ -14,6 +14,12 @@ LICENSE  = Royalty-free
 REQUIRED_MIN_DSM = 7.0
 UNSUPPORTED_ARCHS = comcerto2k
 
+# Mirror libvpx-latest: the modern AV1 encoder needs a recent gcc (C++17-era),
+# and the virtual routes archs here only when TC_GCC_EFFECTIVE >= 7.5. Its
+# REQUIRED_MIN_DSM = 7.0 archs all ship gcc >= 8.5 stock, so this is a belt-and-
+# suspenders floor rather than one exercised by a legacy toolchain today.
+MIN_GCC_VERSION = 7.5
+
 # Set working directory
 PKG_WORK_DIR = $(WORK_DIR)/$(PKG_NAME)_$(PKG_VERS)-build
 

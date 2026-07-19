@@ -284,7 +284,9 @@ tc_meson_cross_vars:
 	  case "$${source}" in gcc|g++|cpp|gfortran) source="$${source}$(TC_GCC_SUFFIX)" ;; esac ; \
 	  if [ "$${target}" = "cpp" ]; then \
 	    echo "# Ref: https://mesonbuild.com/Machine-files.html#binaries" ; \
-	    echo "$${target} = '$(TC_WORK_DIR)/$(TC_TARGET)/bin/$(TC_PREFIX)g++'" ; \
+	    echo "# meson's 'cpp' is the C++ compiler; our TOOLS 'cpp' is the C" ; \
+	    echo "# preprocessor -- hence g++ here, and not \$$source." ; \
+	    echo "$${target} = '$(TC_WORK_DIR)/$(TC_TARGET)/bin/$(TC_PREFIX)g++$(TC_GCC_SUFFIX)'" ; \
 	  elif [ "$${target}" = "fc" ]; then \
 	    echo "fortran = '$(TC_WORK_DIR)/$(TC_TARGET)/bin/$(TC_PREFIX)$${source}'" ; \
 	  elif [ "$${target}" = "cc" ]; then \
@@ -332,7 +334,7 @@ tc_rust_vars:
 	echo TC_ENV += RUSTUP_TOOLCHAIN=\"$(TC_RUSTUP_TOOLCHAIN)\" ; \
 	echo TC_ENV += CARGO_BUILD_TARGET=\"$(RUST_TARGET)\" ; \
 	echo TC_ENV += CARGO_TARGET_$(shell echo $(RUST_TARGET) | tr - _ | tr a-z A-Z)_AR=\"$(TC_WORK_DIR)/$(TC_TARGET)/bin/$(TC_PREFIX)ar\" ; \
-	echo TC_ENV += CARGO_TARGET_$(shell echo $(RUST_TARGET) | tr - _ | tr a-z A-Z)_LINKER=\"$(TC_WORK_DIR)/$(TC_TARGET)/bin/$(TC_PREFIX)gcc\" ; \
+	echo TC_ENV += CARGO_TARGET_$(shell echo $(RUST_TARGET) | tr - _ | tr a-z A-Z)_LINKER=\"$(TC_WORK_DIR)/$(TC_TARGET)/bin/$(TC_PREFIX)gcc$(TC_GCC_SUFFIX)\" ; \
 	echo TC_ENV += CARGO_TARGET_$(shell echo $(RUST_TARGET) | tr - _ | tr a-z A-Z)_RUSTFLAGS=\"$(TC_EXTRA_RUSTFLAGS)\" ; \
 	echo RUSTFLAGS := $(RUSTFLAGS) $$\(ADDITIONAL_RUSTFLAGS\) ; \
 	echo RUST_TARGET := $(RUST_TARGET)
@@ -375,6 +377,8 @@ tc_rust_vars:
 #   endif
 #
 # Both are forwarded to this generation by cross-cc.mk / native-cc.mk / kernel.mk.
+# The default lives in spksrc.common/tc-capability.mk so the package side and this
+# generation cannot disagree; repeated here only for a standalone parse.
 LEGACY_TOOLCHAIN ?= 1
 
 ifeq ($(filter 1 on ON,$(strip $(LEGACY_TOOLCHAIN))),)
@@ -437,6 +441,7 @@ tc_vars:
 	echo TC_INCLUDE := $(TC_INCLUDE) ; \
 	echo TC_LIBRARY := $(TC_LIBRARY) ; \
 	echo TC_EXTRA_CFLAGS := $(TC_EXTRA_CFLAGS) ; \
+	echo TC_EXTRA_LDFLAGS := $(TC_EXTRA_LDFLAGS) ; \
 	echo TC_EXTRA_RUSTFLAGS := $(TC_EXTRA_RUSTFLAGS) ; \
 	echo TC_VERS := $(TC_VERS) ; \
 	echo TC_BUILD := $(TC_BUILD) ; \

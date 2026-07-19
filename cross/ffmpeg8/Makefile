@@ -11,11 +11,31 @@ COMMENT  = FFmpeg is a complete, cross-platform solution to record, convert and 
 LICENSE  = GPLv2
 
 # requires c11 and proper atomic using gcc-4.9+ support
-UNSUPPORTED_ARCHS = $(ARMv5_ARCHS) $(ARMv7L_ARCHS) $(OLD_PPC_ARCHS)
+# ARMv5 (gcc 4.6.4), ARMv7L (4.8.3) and the old PPC (4.3.7) toolchains were listed
+# here; what they have in common is a stock gcc below 4.9, which is where ffmpeg
+# stopped building (4.4 still took gcc 4.6). Stating that lets an overlay lift it.
+MIN_GCC_VERSION = 4.9
 
 include ../../mk/spksrc.common.mk
 
 CONFIGURE_ARGS  = --target-os=linux --cross-prefix=$(TC_PATH)$(TC_PREFIX) --prefix=$(INSTALL_PREFIX)
+# ffmpeg builds the compiler name from --cross-prefix as <prefix>gcc, ignoring the
+# environment CC. With a gcc overlay the real compiler is <prefix>gcc-8.5, so
+# cross-prefix alone picks the stock gcc and configure dies -- on the old archs
+# with "no atomics available" (stdatomic.h arrived in gcc 4.9), on others with
+# "Compiler lacks C11 support".
+#
+# Read the suffix tc_vars baked into the work dir, not the live TC_GCC_SUFFIX make
+# variable: tc_vars.mk recomputes that one and clears it whenever LEGACY_TOOLCHAIN
+# is not propagated into this dependency sub-make, which would silently drop --cc
+# back to the stock gcc while every other package still used the overlay (its CC is
+# baked into the environment and survives). The recorded value is written once, in
+# the mode the whole tree was built with, and cannot drift; it is empty in legacy
+# mode, giving exactly the stock name as before. Same read as the coherence guard
+# in spksrc.common/tc-capability.mk.
+_FF_GCC_SUFFIX = $(shell sed -n 's/^TC_GCC_SUFFIX *:= *//p' $(WORK_DIR)/tc_vars.mk 2>/dev/null)
+CONFIGURE_ARGS += --cc=$(TC_PATH)$(TC_PREFIX)gcc$(_FF_GCC_SUFFIX)
+CONFIGURE_ARGS += --cxx=$(TC_PATH)$(TC_PREFIX)g++$(_FF_GCC_SUFFIX)
 CONFIGURE_ARGS += --pkg-config=/usr/bin/pkg-config
 CONFIGURE_ARGS += --ranlib=$(RANLIB)
 CONFIGURE_ARGS += --enable-cross-compile --enable-rpath --enable-pic
@@ -131,8 +151,14 @@ CONFIGURE_ARGS += --enable-libopus
 DEPENDS += cross/librabbitmq
 CONFIGURE_ARGS += --enable-librabbitmq
 
+# librist uses the htobe*/be*toh macros that <endian.h> only gained in glibc 2.9;
+# the DSM 5.2 ppc853x sysroot is glibc 2.8 and never declares them (a gcc overlay
+# cannot add a libc header). Drop librist there -- one niche transport short of a
+# full build -- rather than fail the whole tree.
+ifeq ($(call version_ge, $(TC_STOCK_GLIBC), 2.9),1)
 DEPENDS += cross/librist
 CONFIGURE_ARGS += --enable-librist
+endif
 
 ifeq ($(call version_ge, $(TC_GCC), 7.5),1)
 DEPENDS += cross/rubberband
@@ -151,8 +177,13 @@ CONFIGURE_ARGS += --enable-libsoxr
 DEPENDS += cross/speex
 CONFIGURE_ARGS += --enable-libspeex
 
+# libsrt, like librist, calls the htobe*/be*toh macros with no fallback and needs
+# glibc >= 2.9 for them (the DSM 5.2 ppc853x sysroot is glibc 2.8). openssl and
+# libuuid use the same macros but autoconf-detect their absence, so they still build.
+ifeq ($(call version_ge, $(TC_STOCK_GLIBC), 2.9),1)
 DEPENDS += cross/libsrt
 CONFIGURE_ARGS += --enable-libsrt
+endif
 
 DEPENDS += cross/flac
 DEPENDS += cross/libtheora
@@ -225,12 +256,43 @@ CONFIGURE_ARGS += --enable-libaom
 endif
 
 # Add SVT-AV1 codec to supported ARCH
-ifeq ($(findstring $(ARCH),alpine comcerto2k monaco $(ARMv8_ARCHS) $(x64_ARCHS)),$(ARCH))
+# SVT-AV1 is 64-bit only ("32-bit is not supported"), so it excludes the 32-bit ARM
+# archs (alpine, comcerto2k, monaco) that were listed here -- latent until the overlay
+# first let those archs build ffmpeg at all.
+ifeq ($(findstring $(ARCH),$(64bit_ARCHS)),$(ARCH))
 DEPENDS += cross/svt-av1
 CONFIGURE_ARGS += --enable-libsvtav1
 endif
 
-ifeq ($(findstring $(ARCH),$(ARMv7_ARCHS)),$(ARCH))
+# ARMv5 has no NEON and no thumb2; ported from ffmpeg4, which still declares it.
+# ffmpeg's configure fails outright without an --arch when cross-compiling. -lrt
+# (clock_gettime, pre-glibc-2.17) comes from the toolchain's TC_EXTRA_LDFLAGS now,
+# not a per-package --extra-ldflags as ffmpeg4 still does.
+# The V4L2 multiplanar API (V4L2_CAP_VIDEO_CAPTURE_MPLANE, VIDEO_MAX_PLANES,
+# v4l2_buffer.m.planes) arrived in Linux 3.1, and ffmpeg's v4l2 device uses it
+# unconditionally. Toolchains that ship older kernel headers (armv5 and the old PPC
+# on 2.6.32) cannot compile it. Keyed on the kernel the toolchain provides rather
+# than on an arch list, so it holds for every such toolchain and needs no upkeep --
+# this replaces the per-arch --disable-indev=v4l2 that armv5 and qoriq carried.
+ifeq ($(call version_lt,$(TC_STOCK_KERNEL),3.1),1)
+CONFIGURE_ARGS += --disable-indev=v4l2 --disable-outdev=v4l2
+endif
+
+ifeq ($(findstring $(ARCH),$(ARMv5_ARCHS)),$(ARCH))
+CONFIGURE_ARGS += --arch=arm
+CONFIGURE_ARGS += --disable-neon
+endif
+
+# <assert.h> only gained the C11 static_assert macro in glibc 2.16, so even gcc 8.5
+# -- which has the _Static_assert keyword -- fails ffmpeg's C11 static-assert check
+# on older sysroots (glibc 2.15 on armv5, 2.8 on ppc853x). Map the macro to the
+# keyword the compiler does have. A header gap, not a compiler one -- so it is keyed
+# on the glibc version, not the arch; the overlay compiler hits it just the same.
+ifeq ($(call version_lt, $(TC_STOCK_GLIBC), 2.16),1)
+CONFIGURE_ARGS += --extra-cflags=-Dstatic_assert=_Static_assert
+endif
+
+ifeq ($(findstring $(ARCH),$(ARMv7_ARCHS) $(ARMv7L_ARCHS)),$(ARCH))
 CONFIGURE_ARGS += --arch=arm
 CONFIGURE_ARGS += --enable-neon
 CONFIGURE_ARGS += --enable-thumb
@@ -251,12 +313,10 @@ CONFIGURE_ARGS += --enable-thumb
 CONFIGURE_ARGS += --enable-v4l2-m2m
 endif
 
-ifeq ($(findstring $(ARCH),qoriq),$(ARCH))
+ifeq ($(findstring $(ARCH),qoriq ppc853x),$(ARCH))
 CONFIGURE_ARGS += --arch=ppc
 CONFIGURE_ARGS += --cpu=e500v2
 CONFIGURE_ARGS += --extra-libs=-latomic
-# ffmpeg-7.1 video4linux2 is no longer compatible
-CONFIGURE_ARGS += --disable-indev=v4l2
 endif
 
 ifeq ($(findstring $(ARCH),evansport),$(ARCH))
@@ -266,6 +326,12 @@ endif
 
 ifeq ($(findstring $(ARCH),$(x64_ARCHS)),$(ARCH))
 CONFIGURE_ARGS += --arch=x86_64
+
+# GPU / hardware acceleration relies on the videodriver stack (libva, libdrm,
+# libmfx) and the Vulkan/OpenCL runtimes, none of which exist below DSM 6.2.4
+# (synocli-videodriver is REQUIRED_MIN_DSM = 6.2.4). A DSM 5.2 x64 resurrected
+# with the gcc overlay is software-only -- mirror the videodriver meta gate.
+ifeq ($(call version_ge, $(TCVERSION), 6.2.4),1)
 CONFIGURE_ARGS += --enable-libdrm
 CONFIGURE_ARGS += --enable-vaapi
 ifeq ($(call version_gt, $(TC_GCC), 5),1)
@@ -291,6 +357,7 @@ ifeq ($(call version_ge, $(TC_GCC), 12),1)
 DEPENDS += cross/libplacebo
 CONFIGURE_ARGS += --enable-libplacebo
 endif
+endif # DSM >= 6.2.4 (videodriver / GPU stack)
 
 endif # ifeq x64_ARCHS
 

@@ -204,12 +204,31 @@ ifneq ($(strip $(TC_OVERLAY_DIR)),)
 	@$(MAKE) --no-print-directory -C $(TC_OVERLAY_DIR)
 endif
 
+# The overlay extracts INTO this toolchain's tree (its EXTRACT_PATH), but keeps
+# its cookies in its OWN directory. So `clean` here wipes the deployed compiler
+# while the overlay still reports "install is up to date", and the next build
+# silently produces a toolchain with no overlay -- LEGACY_TOOLCHAIN=0 then
+# quietly falls back to the stock gcc. The state lives in two directories; it has
+# to be cleared from both.
+clean: clean-overlay
+
+.PHONY: clean-overlay
+clean-overlay:
+ifneq ($(strip $(TC_OVERLAY_DIR)),)
+	@$(MAKE) --no-print-directory -C $(TC_OVERLAY_DIR) clean
+endif
+
+# Hooked onto rustc (and so onto _all) rather than onto tcvars, even though
+# tc_vars is what consumes the result: packages invoke tcvars themselves, with
+# WORK_DIR pointing at their OWN work dir so the generated vars land there. Making
+# tcvars depend on the overlay would drag the whole toolchain chain
+# (tc-overlay -> patch -> extract) into that invocation, and the toolchain would
+# extract into the package's work dir and re-patch an already-patched tree. By
+# then the toolchain -- overlay included -- is built anyway.
 rustc: tc-overlay
 include ../../mk/spksrc.toolchain/tc-rust.mk
 
 include ../../mk/spksrc.toolchain/tc_vars.mk
-
-tcvars: tc-overlay
 
 #####
 
