@@ -13,6 +13,12 @@ HOMEPAGE = https://aomedia.googlesource.com/aom/
 COMMENT  = AOMedia Video 1 (AV1) is an open, royalty-free video coding format designed for video transmissions over the Internet.
 LICENSE  = Royalty-free
 
+# Tested: libaom 3.8 builds under gcc 4.8.3 but not 4.7.3 (x64-5.2, where CMake
+# cannot identify the stock compiler). The capability check refuses the older
+# stock gccs unless the gcc overlay is used. libaom-latest raises this to 7.5;
+# this is the fallback the virtual routes older archs to.
+MIN_GCC_VERSION = 4.8
+
 UNSUPPORTED_ARCHS = $(ARMv5_ARCHS) $(OLD_PPC_ARCHS)
 
 # Set working directory

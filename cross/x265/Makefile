@@ -9,6 +9,12 @@ HOMEPAGE = http://x265.org/
 COMMENT  = x265 is an open source HEVC encoder.
 LICENSE  = GPLv2
 
+# x265's HDR10+ support wants "gcc version above 4.8" (its configure message);
+# tested, that is satisfied by 4.8.3 -- it fails to build under 4.6.4 but builds
+# from 4.8 on. The capability check refuses the older stock gccs (4.3.7 ppc853x,
+# 4.6.4 armv5) unless the gcc overlay is used, rather than failing mid-build.
+MIN_GCC_VERSION = 4.8
+
 PRE_CONFIGURE_TARGET = x265_pre_configure
 PRE_COMPILE_TARGET = x265_pre_compile
 

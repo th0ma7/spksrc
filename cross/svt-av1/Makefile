@@ -19,6 +19,12 @@ POST_INSTALL_TARGET = svt-av1_post_install_target
 # rather than list the 32-bit archs (ARMv5, ARMv7, ARMv7L, i686, PPC).
 REQUIRE_64BIT = 1
 
+# SVT-AV1 is 64-bit only, so only the x64 stock gccs matter in legacy mode:
+# tested, it builds under 4.9.3 (x64-6.2.4) but not 4.7.3 (x64-5.2, where CMake
+# cannot even identify the compiler). The capability check refuses the 4.7.3
+# toolchain unless the gcc overlay is used.
+MIN_GCC_VERSION = 4.9
+
 include ../../mk/spksrc.cross-cmake.mk
 
 ifeq ($(findstring $(ARCH),$(ARMv8_ARCHS)),$(ARCH))

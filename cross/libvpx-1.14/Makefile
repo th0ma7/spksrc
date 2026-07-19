@@ -9,11 +9,16 @@ PKG_DIR = $(PKG_NAME)-$(PKG_VERS)
 DEPENDS =
 OPTIONAL_DEPENDS = native/nasm
 
-UNSUPPORTED_ARCHS = $(OLD_PPC_ARCHS)
-
 HOMEPAGE = https://www.webmproject.org/code/
 COMMENT  = WebM VP8/VP9 Codec
 LICENSE = https://raw.githubusercontent.com/webmproject/libvpx/master/LICENSE
+
+# libvpx 1.14 compiles as C++11 (-std=c++0x below); tested, gcc 4.3.7 rejects it
+# ("C++0x support is experimental") while gcc 4.6.4 builds it. The capability
+# check refuses only the very oldest stock gcc (4.3.7 ppc853x) unless the gcc
+# overlay is used. This is the fallback the virtual routes ARMv5/PowerPC to;
+# libvpx-latest requires 7.5.
+MIN_GCC_VERSION = 4.6
 
 INSTALL_ARGS = install DESTDIR=$(INSTALL_DIR)
 
